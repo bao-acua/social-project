@@ -16,6 +16,7 @@ const envSchema = z.object({
   PUBLIC_DIR: z.string().default(() => {
     return process.env.NODE_ENV == 'production' ? './dist' : './public';
   }),
+  JWT_SECRET: z.string().default('secret'),
 });
 
 export const env = envSchema.parse(process.env);
