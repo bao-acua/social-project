@@ -11,9 +11,14 @@
     "test": "echo 'Test script not configured'"
   },
   "dependencies": {
-    "shared": "*"
+    "@trpc/client": "^11.7.2",
+    "@trpc/server": "^11.7.2",
+    "fastify": "^5.6.2",
+    "shared": "*",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@types/node": "^24.10.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
