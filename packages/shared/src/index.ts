@@ -1,8 +1,3 @@
-export function greet(name: string): string {
-  return `Hello from ${name}!`;
-}
-
-export function add(a: number, b: number): number {
-  return a + b;
-}
-
+export * from './trpc/routers/auth';
+export * from './trpc/routers/post';
+export * from './trpc/routers/comment';
