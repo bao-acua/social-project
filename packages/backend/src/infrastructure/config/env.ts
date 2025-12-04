@@ -11,6 +11,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('0.0.0.0'),
   DATABASE_URL: z.string().default('postgres://localhost:5432/social_project_db'),
+  DATABASE_TEST_URL: z.string().optional(),
   CORS_ORIGIN: z.string().default('http://localhost:3001'),
   INTERNAL_API_KEY: z.string().default(randomUUID()),
   PUBLIC_DIR: z.string().default(() => {
@@ -20,5 +21,12 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse(process.env);
+
+export const getDatabaseUrl = () => {
+  if (env.NODE_ENV === 'test' && env.DATABASE_TEST_URL) {
+    return env.DATABASE_TEST_URL;
+  }
+  return env.DATABASE_URL;
+};
 
 export type Env = z.infer<typeof envSchema>;

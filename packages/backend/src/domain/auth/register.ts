@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { CreateResourceError, ValidationError } from "../../lib/errors";
 import { DBClient } from "../../infrastructure/database/connection";
 import { validatePasswordStrength } from "../../lib/password/password-validator";
-import { RegisterSchemaInput } from "@shared/trpc/routers/auth";
+import { RegisterSchemaInput, type AuthResponse } from "@shared/trpc/routers/auth";
 import { hashPassword } from "../../lib/password/password";
 import { createUser, findUserByUsername } from "./repository/user.repository";
 import { generateUserInitials } from "../../lib/user/initials";
@@ -60,6 +60,7 @@ export async function register(db: DBClient, input: RegisterSchemaInput): Promis
       id: newUser.id,
       username: newUser.username,
       fullName: newUser.fullName,
+      initials: newUser.initials,
       role: newUser.role,
     },
     token: accessToken,
