@@ -34,3 +34,6 @@ export const comments = pgTable('comments', {
   isDeletedIdx: index('comments_is_deleted_idx').on(table.isDeleted),
   searchIdx: index('comments_search_idx').using('gin', table.searchVector),
 }));
+
+export type Comment = typeof comments.$inferSelect;
+export type NewComment = typeof comments.$inferInsert;

@@ -1,4 +1,4 @@
-import { users, posts } from '../../infrastructure/database/schema';
+import { users, posts, comments } from '../../infrastructure/database/schema';
 import { eq } from 'drizzle-orm';
 import type { DBClient } from '../../infrastructure/database/connection';
 
@@ -43,3 +43,24 @@ export async function createTestPost(db: DBClient, postData?: Partial<typeof pos
   return post;
 }
 
+export async function createTestComment(db: DBClient, commentData?: Partial<typeof comments.$inferInsert>) {
+  const [comment] = await db.insert(comments).values({
+    content: commentData?.content || 'Test comment content',
+    postId: commentData?.postId || '',
+    authorId: commentData?.authorId || '',
+    parentCommentId: commentData?.parentCommentId || null,
+    isDeleted: commentData?.isDeleted || false,
+    isEdited: commentData?.isEdited || false,
+    editedAt: commentData?.editedAt || null,
+    editedBy: commentData?.editedBy || null,
+    deletedAt: commentData?.deletedAt || null,
+    deletedBy: commentData?.deletedBy || null,
+    ...commentData,
+  }).returning();
+
+  if (!comment) {
+    throw new Error('Failed to create test comment');
+  }
+
+  return comment;
+}
