@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { userResponseSchema } from "./auth";
 
 export const createPostSchema = z.object({
   content: z
@@ -8,7 +9,10 @@ export const createPostSchema = z.object({
     .trim(),
 });
 
-export const updatePostSchema = z.object({
+export type CreatePostInputSchema = z.infer<typeof createPostSchema>;
+
+export const updatePostInputSchema = z.object({
+  id: z.string().uuid('Invalid post ID format'),
   content: z
     .string()
     .min(1, 'Post content cannot be empty')
@@ -16,9 +20,13 @@ export const updatePostSchema = z.object({
     .trim(),
 });
 
+export type UpdatePostInputSchema = z.infer<typeof updatePostInputSchema>;
+
 export const postIdParamSchema = z.object({
   id: z.string().uuid('Invalid post ID format'),
 });
+
+export type PostIdParamSchema = z.infer<typeof postIdParamSchema>;
 
 export const timelineQuerySchema = z.object({
   limit: z
@@ -41,3 +49,47 @@ export const timelineQuerySchema = z.object({
     .default('false')
     .transform((val) => val === 'true'),
 });
+
+export type TimelineQuerySchemaInput = z.infer<typeof timelineQuerySchema>;
+
+
+export const postResponseSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  author: z.nullable(userResponseSchema),
+  isDeleted: z.boolean(),
+  isEdited: z.boolean(),
+  editedAt: z.date().nullable(),
+  editedByAdmin: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  commentsCount: z.number(),
+});
+
+export const paginationResponseSchema = z.object({
+  limit: z.number(),
+  offset: z.number(),
+  total: z.number(),
+});
+
+export type PostResponse = z.infer<typeof postResponseSchema>;
+
+export const timelineResponseSchema = z.object({
+  posts: z.array(postResponseSchema).default([]),
+  pagination: paginationResponseSchema,
+});
+
+export type TimelineResponse = z.infer<typeof timelineResponseSchema>;
+
+export const createPostResponseSchema = z.object({
+  post: postResponseSchema,
+});
+
+export type CreatePostResponse = z.infer<typeof createPostResponseSchema>;
+
+export const updatePostResponseSchema = z.object({
+  post: postResponseSchema,
+});
+
+export type UpdatePostResponse = z.infer<typeof updatePostResponseSchema>;
+

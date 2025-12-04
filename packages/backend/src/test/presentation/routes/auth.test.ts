@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TRPCError } from '@trpc/server';
-import { createTestCaller, getTestDatabase } from '../../helpers/trpc';
+import { createTestCaller, getTestDatabase, loginByUser } from '../../helpers/trpc';
 import { createTestUser } from '../../helpers/database';
 import { hashPassword } from '../../../lib/password/password';
 
@@ -133,26 +133,14 @@ describe('Auth Router Integration Tests', () => {
   describe('me', () => {
     it('should return current user information', async () => {
       const db = getTestDatabase();
-
-      const password = 'TestPassword123!';
-      const hashedPassword = await hashPassword(password);
-
-      const user = await createTestUser(db, {
+      const { caller, user } = await loginByUser(db, {
         username: 'testuser',
-        password: hashedPassword,
         fullName: 'Test User',
-        role: 'user',
       });
 
-      const authenticatedCaller = createTestCaller(db, {
-        userId: user!.id,
-        username: user!.username,
-        role: user!.role,
-      });
+      const result = await caller.auth.me();
 
-      const result = await authenticatedCaller.auth.me();
-
-      expect(result.id).toBe(user!.id);
+      expect(result.id).toBe(user.id);
       expect(result.username).toBe('testuser');
       expect(result.fullName).toBe('Test User');
       expect(result.role).toBe('user');

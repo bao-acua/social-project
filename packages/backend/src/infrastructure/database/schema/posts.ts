@@ -29,3 +29,6 @@ export const posts = pgTable('posts', {
   isDeletedIdx: index('posts_is_deleted_idx').on(table.isDeleted),
   searchIdx: index('posts_search_idx').using('gin', table.searchVector),
 }));
+
+export type Post = typeof posts.$inferSelect;
+export type NewPost = typeof posts.$inferInsert;
