@@ -5,6 +5,7 @@ import {
   PermissionError,
   PreconditionError,
   ResourceNotFoundError,
+  ValidationError,
 } from '../../lib/errors';
 import { Context } from './context';
 
@@ -57,6 +58,17 @@ const t = initTRPC.context<Context>().create({
           ...shape.data,
           code: 'FORBIDDEN',
           httpStatus: 403,
+          stack: '[REDACTED]',
+        },
+      };
+    }
+    if (error.cause instanceof ValidationError) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          code: 'BAD_REQUEST',
+          httpStatus: 400,
           stack: '[REDACTED]',
         },
       };

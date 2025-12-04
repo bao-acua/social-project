@@ -18,11 +18,44 @@ export const registerSchema = z.object({
   role: z.enum(['user', 'admin']).default('user'),
 });
 
+export type RegisterSchemaInput = z.infer<typeof registerSchema>;
+
 export const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
+export type LoginSchemaInput = z.infer<typeof loginSchema>;
 
 
+export const tokenPayloadResponseSchema = z.object({
+  userId: z.string(),
+  username: z.string(),
+  role: z.enum(['user', 'admin']),
+});
 
+export type TokenPayload = z.infer<typeof tokenPayloadResponseSchema>;
+
+export const authResponseSchema = z.object({
+  user: z.object({
+    id: z.string(),
+    username: z.string(),
+    fullName: z.string(),
+    initials: z.string(),
+    role: z.enum(['user', 'admin']),
+  }),
+  token: z.string(),
+});
+
+export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+
+export const userResponseSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  fullName: z.string(),
+  initials: z.string(),
+  role: z.enum(['user', 'admin']),
+});
+
+export type UserResponse = z.infer<typeof userResponseSchema>;

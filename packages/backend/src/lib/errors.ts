@@ -60,3 +60,12 @@ export class ValidationError extends Error {
     this.reason = reason;
   }
 }
+
+export class CreateResourceError extends Error {
+  reason: string;
+  constructor(reason: string) {
+    super(`Create resource error: ${reason}`);
+    this.name = 'CreateResourceError';
+    this.reason = reason;
+  }
+}

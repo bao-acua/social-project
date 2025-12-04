@@ -1,11 +1,11 @@
 import { inferAsyncReturnType } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { db } from '../database/connection';
-import { extractBearerToken, verifyAccessToken } from '../auth/jwt';
+import { extractBearerToken, TokenPayload, verifyAccessToken } from '../auth/jwt';
 
 export async function createContext({ req, res }: CreateFastifyContextOptions) {
   const authorization = req.headers.authorization;
-  let user: unknown | null = null;
+  let user: TokenPayload | undefined = undefined;
 
   if (authorization) {
     try {
