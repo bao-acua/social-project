@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { FormField } from '@/components/form-field'
 import { useAuth } from '@/context/auth-context'
+import { getErrorMessage } from '@/lib/error-utils'
+import { ErrorMessage } from '@/components/error-message'
 
 function SelectRole({ role, setRole }: { role: string, setRole: (role: string) => void }) {
   return (
@@ -59,8 +61,12 @@ export function RegisterForm() {
     try {
       await register(username, fullName, password, role)
       router.push('/timeline')
-    } catch (err: any) {
-      setError('Registration failed. Please try again.')
+    } catch (err: unknown) {
+      const errorMessage = getErrorMessage(err)
+      setError(errorMessage)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Registration error:', err)
+      }
     }
   }
 
@@ -108,9 +114,7 @@ export function RegisterForm() {
           />
           <SelectRole role={role} setRole={setRole} />
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <ErrorMessage error={error} />}
           <Button type="submit" className="w-full">
             Sign Up
           </Button>
