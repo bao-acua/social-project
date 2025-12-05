@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/auth-context'
+import { getErrorMessage } from '@/lib/error-utils'
+import { ErrorMessage } from '@/components/error-message'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -30,12 +32,11 @@ export default function LoginPage() {
       await login(username, password)
       router.push('/timeline')
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError('An unknown error occurred')
+      const errorMessage = getErrorMessage(error)
+      setError(errorMessage || 'Invalid username or password')
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', error)
       }
-      setError('Invalid username or password')
     }
   }
 
@@ -73,9 +74,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                {error && (
-                  <p className="text-sm text-destructive">{error}</p>
-                )}
+                {error && <ErrorMessage error={error} />}
                 <Button type="submit" className="w-full">
                   Sign In
                 </Button>

@@ -1,5 +1,5 @@
 const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+  return process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000'
 }
 
 export async function GET(request: Request) {
@@ -20,10 +20,18 @@ export async function GET(request: Request) {
 
     return response
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to connect to backend' }), {
-      status: 500,
-      headers: { 'content-type': 'application/json' },
-    })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to connect to backend',
+        details: errorMessage,
+        backendUrl: getBackendUrl()
+      }), 
+      {
+        status: 500,
+        headers: { 'content-type': 'application/json' },
+      }
+    )
   }
 }
 
@@ -48,9 +56,17 @@ export async function POST(request: Request) {
 
     return response
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to connect to backend' }), {
-      status: 500,
-      headers: { 'content-type': 'application/json' },
-    })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to connect to backend',
+        details: errorMessage,
+        backendUrl: getBackendUrl()
+      }), 
+      {
+        status: 500,
+        headers: { 'content-type': 'application/json' },
+      }
+    )
   }
 }
