@@ -94,6 +94,13 @@ export async function countCommentsByPostIds(db: DBClient, postIds: string[]): P
   return countMap;
 }
 
+export async function getPostById(db: DBClient, id: string): Promise<Post | undefined> {
+  const post = await db.query.posts.findFirst({
+    where: (posts, { eq }) => eq(posts.id, id),
+  });
+  return post;
+}
+
 export async function updatePost(db: DBClient, id: string, content: string, userId: string): Promise<PostWithAuthor> {
   const [post] = await db
     .update(posts)

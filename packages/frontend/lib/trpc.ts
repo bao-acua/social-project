@@ -25,6 +25,7 @@ export function getEndingLink() {
     const baseUrl = getBaseUrl()
     url = `${baseUrl}/api/trpc`
   }
+
   return httpBatchLink({
     url,
     transformer: superjson,
