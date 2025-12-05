@@ -31,21 +31,38 @@ export interface TRPCClientError {
   cause?: unknown
 }
 
+// Helper to extract the actual error from nested structures
+function extractError(error: unknown): unknown {
+  if (typeof error === 'object' && error !== null) {
+    // Handle { error: { json: { ... } } } structure
+    if ('error' in error && typeof error.error === 'object' && error.error !== null) {
+      if ('json' in error.error) {
+        return error.error.json
+      }
+      return error.error
+    }
+  }
+  return error
+}
+
 export function isTRPCError(error: unknown): error is TRPCClientError {
+  const actualError = extractError(error)
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as TRPCClientError).message === 'string'
+    typeof actualError === 'object' &&
+    actualError !== null &&
+    'message' in actualError &&
+    typeof (actualError as TRPCClientError).message === 'string'
   )
 }
 
 export function getTRPCErrorCode(error: unknown): TRPCErrorCode | null {
-  if (!isTRPCError(error)) {
+  const actualError = extractError(error)
+  if (!isTRPCError(actualError)) {
     return null
   }
 
-  return error.data?.code || error.shape?.code || 'INTERNAL_SERVER_ERROR'
+  const err = actualError as TRPCClientError
+  return err.data?.code || err.shape?.code || 'INTERNAL_SERVER_ERROR'
 }
 
 export function getTRPCErrorMessage(error: unknown): string {
@@ -57,15 +74,18 @@ export function getTRPCErrorMessage(error: unknown): string {
     return error
   }
 
-  if (!isTRPCError(error)) {
-    if (error instanceof Error) {
-      return error.message
+  const actualError = extractError(error)
+
+  if (!isTRPCError(actualError)) {
+    if (actualError instanceof Error) {
+      return actualError.message
     }
     return 'An unknown error occurred'
   }
 
+  const err = actualError as TRPCClientError
   const code = getTRPCErrorCode(error)
-  const message = error.message || error.data?.message || error.shape?.message
+  const message = err.message || err.data?.message || err.shape?.message
 
   if (message && !message.includes('ID=')) {
     return message
@@ -108,7 +128,9 @@ export function getErrorDetails(error: unknown): {
   httpStatus: number | null
   isUserError: boolean
 } {
-  if (!isTRPCError(error)) {
+  const actualError = extractError(error)
+
+  if (!isTRPCError(actualError)) {
     return {
       message: getTRPCErrorMessage(error),
       code: null,
@@ -117,8 +139,9 @@ export function getErrorDetails(error: unknown): {
     }
   }
 
+  const err = actualError as TRPCClientError
   const code = getTRPCErrorCode(error)
-  const httpStatus = error.data?.httpStatus || error.shape?.data?.httpStatus || null
+  const httpStatus = err.data?.httpStatus || err.shape?.data?.httpStatus || null
   const message = getTRPCErrorMessage(error)
 
   const isUserError =
