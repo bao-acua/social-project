@@ -18,18 +18,24 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth, type User } from '@/context/auth-context'
+import { usePathname } from 'next/navigation'
 
 function LoggedInNavbar({ username, logout }: { username: string; logout: () => void }) {
+  const pathname = usePathname()
+  console.log("🚀 ~ LoggedInNavbar ~ pathname:", pathname)
   return (
     <>
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <Link href="/timeline" legacyBehavior passHref>
-              <NavigationMenuLink className="inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
-                Timeline
-              </NavigationMenuLink>
-            </Link>
+            {pathname !== '/timeline' && <>
+              <Link href="/timeline" legacyBehavior passHref>
+                <NavigationMenuLink className="inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
+                  Timeline
+                </NavigationMenuLink>
+              </Link>
+            </>
+            }
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
