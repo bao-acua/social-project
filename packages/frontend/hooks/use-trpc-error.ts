@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { getTRPCErrorMessage, getErrorDetails, type TRPCErrorCode } from '@/lib/trpc-error'
+import { getErrorDetails, type TRPCErrorCode } from '@/lib/trpc-error'
 
 export function useTRPCError() {
   const [error, setError] = useState<string | null>(null)

@@ -40,3 +40,4 @@ export function getEndingLink() {
 }
 
 export { superjson }
+export { AppRouter}
