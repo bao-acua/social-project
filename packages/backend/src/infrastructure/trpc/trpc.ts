@@ -2,6 +2,7 @@ import { initTRPC } from '@trpc/server';
 import superjson from 'superjson';
 import {
   ConflictError,
+  CreateResourceError,
   PermissionError,
   PreconditionError,
   ResourceNotFoundError,
@@ -21,6 +22,7 @@ const t = initTRPC.context<Context>().create({
     if (error.cause instanceof PreconditionError) {
       return {
         ...shape,
+        message: error.message || shape.message,
         data: {
           ...shape.data,
           code: 'CONFLICT',
@@ -32,6 +34,7 @@ const t = initTRPC.context<Context>().create({
     if (error.cause instanceof ConflictError) {
       return {
         ...shape,
+        message: error.message || shape.message,
         data: {
           ...shape.data,
           code: 'CONFLICT',
@@ -43,6 +46,7 @@ const t = initTRPC.context<Context>().create({
     if (error.cause instanceof ResourceNotFoundError) {
       return {
         ...shape,
+        message: error.message || shape.message,
         data: {
           ...shape.data,
           code: 'NOT_FOUND',
@@ -54,6 +58,7 @@ const t = initTRPC.context<Context>().create({
     if (error.cause instanceof PermissionError) {
       return {
         ...shape,
+        message: error.message || shape.message,
         data: {
           ...shape.data,
           code: 'FORBIDDEN',
@@ -65,6 +70,19 @@ const t = initTRPC.context<Context>().create({
     if (error.cause instanceof ValidationError) {
       return {
         ...shape,
+        message: error.message || shape.message,
+        data: {
+          ...shape.data,
+          code: 'BAD_REQUEST',
+          httpStatus: 400,
+          stack: '[REDACTED]',
+        },
+      };
+    }
+    if (error.cause instanceof CreateResourceError) {
+      return {
+        ...shape,
+        message: error.message || shape.message,
         data: {
           ...shape.data,
           code: 'BAD_REQUEST',

@@ -32,9 +32,9 @@ export const createTRPCPlugin: FastifyPluginAsync = async (fastify) => {
           {
             error: {
               code: error.code,
-              message: '[REMOVED]',
-              cause: '[REMOVED]',
-              stack: '[REMOVED]',
+              message: process.env.NODE_ENV === 'development' ? error.message : '[REDACTED]',
+              cause: process.env.NODE_ENV === 'development' ? error.cause : '[REDACTED]',
+              stack: process.env.NODE_ENV === 'development' ? error.stack : '[REDACTED]',
             },
             trpc: {
               path,

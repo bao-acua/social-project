@@ -1,9 +1,7 @@
-import { greet } from 'shared';
 import { createServer } from './infrastructure/server.js';
 
 async function main() {
   console.log('Backend starting...');
-  console.log(greet('Backend'));
 
   const server = await createServer({ port: 3000 });
   const address = server.server.address();
