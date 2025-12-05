@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@backend/*": ["../backend/src/*"]
     },
     "composite": true
   },
@@ -27,12 +28,16 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../backend/src/infrastructure/trpc/router.ts"
   ],
-  "exclude": ["node_modules", "../backend/**/*", "../shared/**/*"],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../shared"
+    },
+    {
+      "path": "../backend"
     }
   ]
 }

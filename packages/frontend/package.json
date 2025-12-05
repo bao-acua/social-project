@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev  --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -19,12 +19,17 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@tanstack/react-query": "^5.17.0",
+    "@trpc/client": "^11.7.2",
+    "@trpc/next": "^11.7.2",
+    "@trpc/react-query": "^11.7.2",
+    "@trpc/server": "^11.7.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "next": "^14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "shared": "*",
+    "superjson": "^2.2.6",
     "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
