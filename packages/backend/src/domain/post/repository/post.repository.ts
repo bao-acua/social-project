@@ -152,3 +152,76 @@ export async function createPost(db: DBClient, data: NewPost): Promise<Post> {
   const [post] = await db.insert(posts).values(data).returning();
   return post!;
 }
+
+export async function searchPosts(
+  db: DBClient,
+  query: string,
+  limit: number,
+  offset: number,
+  includeDeleted: boolean = false
+): Promise<PostWithAuthor[]> {
+  const searchQuery = query.trim().split(/\s+/).join(' & ');
+
+  const searchCondition = sql`(
+    ${posts.searchVector} @@ to_tsquery('english', ${searchQuery})
+    OR ${users.searchVector} @@ to_tsquery('english', ${searchQuery})
+  )`;
+
+  const whereConditions = includeDeleted
+    ? [searchCondition]
+    : [eq(posts.isDeleted, false), searchCondition];
+
+  const results = await db
+    .select({
+      id: posts.id,
+      content: posts.content,
+      authorId: posts.authorId,
+      isDeleted: posts.isDeleted,
+      deletedAt: posts.deletedAt,
+      deletedBy: posts.deletedBy,
+      isEdited: posts.isEdited,
+      editedAt: posts.editedAt,
+      editedBy: posts.editedBy,
+      searchVector: posts.searchVector,
+      createdAt: posts.createdAt,
+      updatedAt: posts.updatedAt,
+      author: users,
+    })
+    .from(posts)
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(and(...whereConditions))
+    .orderBy(desc(posts.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return results.map((row): PostWithAuthor => {
+    const { author, ...postFields } = row;
+    return {
+      ...postFields,
+      author,
+    };
+  });
+}
+
+export async function countSearchResults(db: DBClient, query: string, includeDeleted: boolean = false): Promise<number> {
+  const searchQuery = query.trim().split(/\s+/).join(' & ');
+
+  const searchCondition = sql`(
+    ${posts.searchVector} @@ to_tsquery('english', ${searchQuery})
+    OR ${users.searchVector} @@ to_tsquery('english', ${searchQuery})
+  )`;
+
+  const whereConditions = includeDeleted
+    ? [searchCondition]
+    : [eq(posts.isDeleted, false), searchCondition];
+
+  const result = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+    })
+    .from(posts)
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(and(...whereConditions));
+
+  return result[0]?.count ?? 0;
+}

@@ -260,5 +260,332 @@ describe('Post Router Integration Tests', () => {
       ).rejects.toThrow();
     });
   });
+
+  describe('searchPosts', () => {
+    it('should successfully search posts by content', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db, {
+        username: 'searchuser',
+        fullName: 'Search User',
+      });
+
+      await createTestPost(db, {
+        content: 'This post contains javascript programming',
+        authorId: user.id,
+      });
+
+      await createTestPost(db, {
+        content: 'This post contains python programming',
+        authorId: user.id,
+      });
+
+      await createTestPost(db, {
+        content: 'This post is about cooking',
+        authorId: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'javascript',
+        limit: '10',
+        offset: '0',
+      });
+
+      expect(result.posts.length).toBeGreaterThanOrEqual(1);
+      expect(result.posts[0].content).toContain('javascript');
+    });
+
+    it('should successfully search posts by author name', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db, {
+        username: 'johndoe',
+        fullName: 'John Doe',
+      });
+
+      await createTestPost(db, {
+        content: 'Random content here',
+        authorId: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'John',
+        limit: '10',
+        offset: '0',
+      });
+
+      expect(result.posts.length).toBeGreaterThanOrEqual(1);
+      expect(result.posts.some(post => post.author?.fullName.includes('John'))).toBe(true);
+    });
+
+    it('should successfully search posts by username', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db, {
+        username: 'uniqueusername123',
+        fullName: 'Test User',
+      });
+
+      await createTestPost(db, {
+        content: 'Some random content',
+        authorId: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'uniqueusername123',
+        limit: '10',
+        offset: '0',
+      });
+
+      expect(result.posts.length).toBeGreaterThanOrEqual(1);
+      expect(result.posts[0].author?.username).toBe('uniqueusername123');
+    });
+
+    it('should return empty results for non-matching query', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      await createTestPost(db, {
+        content: 'Some content here',
+        authorId: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'nonexistentqueryxyz123',
+        limit: '10',
+        offset: '0',
+      });
+
+      expect(result.posts.length).toBe(0);
+      expect(result.pagination.total).toBe(0);
+    });
+
+    it('should respect pagination limits', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      for (let i = 0; i < 5; i++) {
+        await createTestPost(db, {
+          content: `Test searchable content ${i}`,
+          authorId: user.id,
+        });
+      }
+
+      const result = await caller.posts.searchPosts({
+        query: 'searchable',
+        limit: '2',
+        offset: '0',
+      });
+
+      expect(result.posts.length).toBeLessThanOrEqual(2);
+      expect(result.pagination.limit).toBe(2);
+    });
+
+    it('should respect pagination offset', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      for (let i = 0; i < 5; i++) {
+        await createTestPost(db, {
+          content: `Unique searchable item ${i}`,
+          authorId: user.id,
+        });
+      }
+
+      const firstPage = await caller.posts.searchPosts({
+        query: 'searchable',
+        limit: '2',
+        offset: '0',
+      });
+
+      const secondPage = await caller.posts.searchPosts({
+        query: 'searchable',
+        limit: '2',
+        offset: '2',
+      });
+
+      expect(firstPage.posts[0].id).not.toBe(secondPage.posts[0]?.id);
+    });
+
+    it('should not return deleted posts for regular users', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      await createTestPost(db, {
+        content: 'Active searchable post',
+        authorId: user.id,
+        isDeleted: false,
+      });
+
+      await createTestPost(db, {
+        content: 'Deleted searchable post',
+        authorId: user.id,
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'searchable',
+        limit: '10',
+        offset: '0',
+        includeDeleted: 'true',
+      });
+
+      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      expect(deletedPosts.length).toBe(0);
+    });
+
+    it('should return deleted posts for admin users when includeDeleted is true', async () => {
+      const db = getTestDatabase();
+      const { caller, user: admin } = await loginByAdmin(db, {
+        username: 'searchadmin',
+        fullName: 'Search Admin',
+      });
+
+      await createTestPost(db, {
+        content: 'Active searchable post',
+        authorId: admin.id,
+        isDeleted: false,
+      });
+
+      await createTestPost(db, {
+        content: 'Deleted searchable post',
+        authorId: admin.id,
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: admin.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'searchable',
+        limit: '10',
+        offset: '0',
+        includeDeleted: 'true',
+      });
+
+      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      expect(deletedPosts.length).toBeGreaterThanOrEqual(1);
+      expect(result.posts.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should not return deleted posts for admin users when includeDeleted is false', async () => {
+      const db = getTestDatabase();
+      const { caller, user: admin } = await loginByAdmin(db);
+
+      await createTestPost(db, {
+        content: 'Active searchable post',
+        authorId: admin.id,
+        isDeleted: false,
+      });
+
+      await createTestPost(db, {
+        content: 'Deleted searchable post',
+        authorId: admin.id,
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: admin.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'searchable',
+        limit: '10',
+        offset: '0',
+        includeDeleted: 'false',
+      });
+
+      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      expect(deletedPosts.length).toBe(0);
+    });
+
+    it('should search with multiple words', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      await createTestPost(db, {
+        content: 'Learn javascript programming today',
+        authorId: user.id,
+      });
+
+      await createTestPost(db, {
+        content: 'Learn python programming today',
+        authorId: user.id,
+      });
+
+      await createTestPost(db, {
+        content: 'Cooking recipes for beginners',
+        authorId: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'javascript programming',
+        limit: '10',
+        offset: '0',
+      });
+
+      expect(result.posts.length).toBeGreaterThanOrEqual(1);
+      const post = result.posts.find(p => p.content.includes('javascript'));
+      expect(post).toBeDefined();
+    });
+
+    it('should throw error for empty search query', async () => {
+      const db = getTestDatabase();
+      const { caller } = await loginByUser(db);
+
+      await expect(
+        caller.posts.searchPosts({
+          query: '',
+          limit: '10',
+          offset: '0',
+        })
+      ).rejects.toThrow();
+    });
+
+    it('should throw error for query too long', async () => {
+      const db = getTestDatabase();
+      const { caller } = await loginByUser(db);
+
+      const longQuery = 'a'.repeat(201);
+
+      await expect(
+        caller.posts.searchPosts({
+          query: longQuery,
+          limit: '10',
+          offset: '0',
+        })
+      ).rejects.toThrow();
+    });
+
+    it('should throw error when user is not authenticated', async () => {
+      const db = getTestDatabase();
+      const caller = createTestCaller(db);
+
+      await expect(
+        caller.posts.searchPosts({
+          query: 'test',
+          limit: '10',
+          offset: '0',
+        })
+      ).rejects.toThrow();
+    });
+
+    it('should include comment counts in search results', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      const post = await createTestPost(db, {
+        content: 'Searchable post with comments',
+        authorId: user.id,
+      });
+
+      const result = await caller.posts.searchPosts({
+        query: 'Searchable',
+        limit: '10',
+        offset: '0',
+      });
+
+      const foundPost = result.posts.find(p => p.id === post.id);
+      expect(foundPost).toBeDefined();
+      expect(foundPost?.commentsCount).toBeDefined();
+      expect(typeof foundPost?.commentsCount).toBe('number');
+    });
+  });
 });
 

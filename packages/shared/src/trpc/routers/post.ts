@@ -93,3 +93,39 @@ export const updatePostResponseSchema = z.object({
 
 export type UpdatePostResponse = z.infer<typeof updatePostResponseSchema>;
 
+export const searchPostsSchema = z.object({
+  query: z
+    .string()
+    .min(1, 'Search query cannot be empty')
+    .max(200, 'Search query must be at most 200 characters')
+    .trim(),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 20))
+    .refine((val) => val >= 1 && val <= 100, {
+      message: 'Limit must be between 1 and 100',
+    }),
+  offset: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 0))
+    .refine((val) => val >= 0, {
+      message: 'Offset must be 0 or greater',
+    }),
+  includeDeleted: z
+    .string()
+    .optional()
+    .default('false')
+    .transform((val) => val === 'true'),
+});
+
+export type SearchPostsInput = z.infer<typeof searchPostsSchema>;
+
+export const searchPostsResponseSchema = z.object({
+  posts: z.array(postResponseSchema).default([]),
+  pagination: paginationResponseSchema,
+});
+
+export type SearchPostsResponse = z.infer<typeof searchPostsResponseSchema>;
+
