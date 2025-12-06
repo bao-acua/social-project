@@ -16,9 +16,17 @@ interface PostCardProps {
   post: PostResponse
   currentUserId?: string
   isAdmin?: boolean
+  onPostUpdated?: (updatedPost: Partial<PostResponse> & { id: string }) => void
+  onPostDeleted?: (postId: string, isAdmin: boolean) => void
 }
 
-export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps) {
+export function EnhancedPostCard({
+  post,
+  currentUserId,
+  isAdmin,
+  onPostUpdated,
+  onPostDeleted
+}: PostCardProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [showComments, setShowComments] = useState(false)
@@ -29,43 +37,67 @@ export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps
     onMutate: async (variables) => {
       // Cancel outgoing refetches
       await utils.posts.getTimeline.cancel()
+      await utils.posts.searchPosts.cancel()
 
-      // Snapshot previous value
-      const previousTimeline = utils.posts.getTimeline.getData()
+      // Snapshot previous values
+      const previousData: any[] = []
 
-      // Optimistically update
-      utils.posts.getTimeline.setData(undefined, (old) => {
+      // Prepare the updated post data
+      const updatedPostData = {
+        id: variables.id,
+        content: variables.content,
+        isEdited: true,
+        editedAt: new Date(),
+        editedByAdmin: isAdmin && post.author?.id !== currentUserId,
+      }
+
+      // Update local state immediately
+      onPostUpdated?.(updatedPostData)
+
+      // Update all timeline queries with optimistic data
+      utils.posts.getTimeline.setQueriesData({}, (old) => {
         if (!old) return old
+        previousData.push({ type: 'timeline', data: old })
         return {
           ...old,
           posts: old.posts.map((p) =>
             p.id === variables.id
-              ? {
-                  ...p,
-                  content: variables.content,
-                  isEdited: true,
-                  editedAt: new Date(),
-                  editedByAdmin: isAdmin && p.author.id !== currentUserId,
-                }
+              ? { ...p, ...updatedPostData }
               : p
           ),
         }
       })
 
-      return { previousTimeline }
+      // Update all search queries with optimistic data
+      utils.posts.searchPosts.setQueriesData({}, (old) => {
+        if (!old) return old
+        previousData.push({ type: 'search', data: old })
+        return {
+          ...old,
+          posts: old.posts.map((p) =>
+            p.id === variables.id
+              ? { ...p, ...updatedPostData }
+              : p
+          ),
+        }
+      })
+
+      return { previousData }
     },
     onError: (err, variables, context) => {
       // Rollback on error
-      if (context?.previousTimeline) {
-        utils.posts.getTimeline.setData(undefined, context.previousTimeline)
+      if (context?.previousData) {
+        context.previousData.forEach(({ type, data }) => {
+          if (type === 'timeline') {
+            utils.posts.getTimeline.setQueriesData({}, data)
+          } else if (type === 'search') {
+            utils.posts.searchPosts.setQueriesData({}, data)
+          }
+        })
       }
     },
     onSuccess: () => {
       setEditDialogOpen(false)
-    },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      utils.posts.getTimeline.invalidate()
     },
   })
 
@@ -73,13 +105,18 @@ export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps
     onMutate: async (variables) => {
       // Cancel outgoing refetches
       await utils.posts.getTimeline.cancel()
+      await utils.posts.searchPosts.cancel()
 
-      // Snapshot previous value
-      const previousTimeline = utils.posts.getTimeline.getData()
+      // Snapshot previous values
+      const previousData: any[] = []
 
-      // Optimistically update (mark as deleted for admin, remove for users)
-      utils.posts.getTimeline.setData(undefined, (old) => {
+      // Update local state immediately
+      onPostDeleted?.(variables.id, isAdmin || false)
+
+      // Optimistically update all timeline queries (mark as deleted for admin, remove for users)
+      utils.posts.getTimeline.setQueriesData({}, (old) => {
         if (!old) return old
+        previousData.push({ type: 'timeline', data: old })
         return {
           ...old,
           posts: isAdmin
@@ -96,20 +133,42 @@ export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps
         }
       })
 
-      return { previousTimeline }
+      // Optimistically update all search queries
+      utils.posts.searchPosts.setQueriesData({}, (old) => {
+        if (!old) return old
+        previousData.push({ type: 'search', data: old })
+        return {
+          ...old,
+          posts: isAdmin
+            ? old.posts.map((p) =>
+                p.id === variables.id
+                  ? { ...p, isDeleted: true, deletedAt: new Date() }
+                  : p
+              )
+            : old.posts.filter((p) => p.id !== variables.id),
+          pagination: {
+            ...old.pagination,
+            total: isAdmin ? old.pagination.total : old.pagination.total - 1,
+          },
+        }
+      })
+
+      return { previousData }
     },
     onError: (err, variables, context) => {
       // Rollback on error
-      if (context?.previousTimeline) {
-        utils.posts.getTimeline.setData(undefined, context.previousTimeline)
+      if (context?.previousData) {
+        context.previousData.forEach(({ type, data }) => {
+          if (type === 'timeline') {
+            utils.posts.getTimeline.setQueriesData({}, data)
+          } else if (type === 'search') {
+            utils.posts.searchPosts.setQueriesData({}, data)
+          }
+        })
       }
     },
     onSuccess: () => {
       setDeleteDialogOpen(false)
-    },
-    onSettled: () => {
-      // Refetch to ensure data consistency
-      utils.posts.getTimeline.invalidate()
     },
   })
 

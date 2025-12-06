@@ -114,6 +114,32 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
     setSearchInput(value)
   }, [])
 
+  const handlePostUpdated = useCallback((updatedPost: Partial<PostResponse> & { id: string }) => {
+    setAllPosts(prev =>
+      prev.map(post =>
+        post.id === updatedPost.id
+          ? { ...post, ...updatedPost }
+          : post
+      )
+    )
+  }, [])
+
+  const handlePostDeleted = useCallback((postId: string, isAdmin: boolean) => {
+    setAllPosts(prev => {
+      if (isAdmin) {
+        // Admin: mark as deleted
+        return prev.map(post =>
+          post.id === postId
+            ? { ...post, isDeleted: true, deletedAt: new Date() }
+            : post
+        )
+      } else {
+        // User: remove from list
+        return prev.filter(post => post.id !== postId)
+      }
+    })
+  }, [])
+
   return {
     posts: allPosts,
     isLoading,
@@ -128,6 +154,8 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
     handleSearch,
     handleClearSearch,
     handlePostCreated,
+    handlePostUpdated,
+    handlePostDeleted,
     handleSearchInputChange,
   }
 }

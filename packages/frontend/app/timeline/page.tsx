@@ -25,6 +25,8 @@ export default function TimelinePage() {
     handleSearch,
     handleClearSearch,
     handlePostCreated,
+    handlePostUpdated,
+    handlePostDeleted,
     handleSearchInputChange,
   } = useTimeline({ userRole: user?.role })
 
@@ -65,6 +67,8 @@ export default function TimelinePage() {
               currentUserId={user?.id}
               isAdmin={user?.role === 'admin'}
               onLoadMore={fetchNextPage}
+              onPostUpdated={handlePostUpdated}
+              onPostDeleted={handlePostDeleted}
             />
           </div>
         </main>

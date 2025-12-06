@@ -17,6 +17,8 @@ interface PostListProps {
   currentUserId?: string
   isAdmin?: boolean
   onLoadMore?: () => void
+  onPostUpdated?: (updatedPost: Partial<PostResponse> & { id: string }) => void
+  onPostDeleted?: (postId: string, isAdmin: boolean) => void
 }
 
 export const PostList = forwardRef<HTMLDivElement, PostListProps>(
@@ -30,6 +32,8 @@ export const PostList = forwardRef<HTMLDivElement, PostListProps>(
       isSearchMode,
       currentUserId,
       isAdmin,
+      onPostUpdated,
+      onPostDeleted,
     },
     loadMoreRef
   ) {
@@ -72,6 +76,8 @@ export const PostList = forwardRef<HTMLDivElement, PostListProps>(
               post={post}
               currentUserId={currentUserId}
               isAdmin={isAdmin}
+              onPostUpdated={onPostUpdated}
+              onPostDeleted={onPostDeleted}
             />
           ))}
         </div>
