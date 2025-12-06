@@ -6,32 +6,31 @@ test.describe('User Post Management', () => {
   test('user should be able to create a new post', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Click create post button
-    await page.getByTestId('create-post-trigger').click();
+    const createPostTrigger = page.getByTestId('create-post-trigger');
+    await createPostTrigger.waitFor({ state: 'visible' });
+    await createPostTrigger.click();
 
-    // Fill in post content
     const postContent = 'This is my new test post!';
-    await page.getByTestId('create-post-content-input').fill(postContent);
+    const contentInput = page.getByTestId('create-post-content-input');
+    await contentInput.waitFor({ state: 'visible' });
+    await contentInput.fill(postContent);
 
-    // Submit post
-    await page.getByTestId('create-post-submit-button').click();
+    const submitButton = page.getByTestId('create-post-submit-button');
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
 
-    // Should see the new post in timeline
     await expect(page.locator(`text=${postContent}`)).toBeVisible();
   });
 
   test('user should NOT be able to see deleted posts', async ({ page, cleanDatabase }) => {
-    // Create two users
     const user1 = await createTestUser(TEST_USERS.user1);
     const admin = await createTestUser(TEST_USERS.admin);
 
-    // Create an active post
     await createTestPost({
       content: 'Active post content',
       authorId: user1.id,
     });
 
-    // Create a deleted post
     await createTestPost({
       content: 'Deleted post content',
       authorId: user1.id,
@@ -39,60 +38,77 @@ test.describe('User Post Management', () => {
       deletedBy: admin.id,
     });
 
-    // Login as user1
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see active post
     await expect(page.locator('text=Active post content')).toBeVisible();
-
-    // Should NOT see deleted post
     await expect(page.locator('text=Deleted post content')).not.toBeVisible();
   });
 
   test('user should be able to edit their own post', async ({ page, cleanDatabase }) => {
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a post by this user
     await createTestPost({
       content: 'Original post content',
       authorId: user.id,
     });
 
-    // Login as user
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see the post
     await expect(page.locator('text=Original post content')).toBeVisible();
 
-    // Open post actions menu
-    await page.getByTestId('post-actions-menu-trigger').first().click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Should see edit option
-    await expect(page.getByTestId('post-edit-button')).toBeVisible();
+    const editButton = page.getByTestId('post-edit-button');
+    await editButton.waitFor({ state: 'visible' });
+    await expect(editButton).toBeVisible();
+    await editButton.click();
 
-    // Click edit
-    await page.getByTestId('post-edit-button').click();
+    const editDialog = page.getByTestId('edit-post-dialog');
+    await editDialog.waitFor({ state: 'visible' });
+    await expect(editDialog).toBeVisible();
 
-    // Edit dialog should open
-    await expect(page.getByTestId('edit-post-dialog')).toBeVisible();
-
-    // Change content
     const newContent = 'Edited post content by user';
-    await page.getByTestId('edit-post-content-input').clear();
-    await page.getByTestId('edit-post-content-input').fill(newContent);
+    const contentInput = page.getByTestId('edit-post-content-input');
+    await contentInput.waitFor({ state: 'visible' });
+    await contentInput.clear();
+    await contentInput.fill(newContent);
 
-    // Save changes
-    await page.getByTestId('edit-post-save-button').click();
+    const saveButton = page.getByTestId('edit-post-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Should see updated content
     await expect(page.locator(`text=${newContent}`)).toBeVisible();
     await expect(page.locator('text=Original post content')).not.toBeVisible();
   });
@@ -100,94 +116,115 @@ test.describe('User Post Management', () => {
   test('user should be able to delete their own post', async ({ page, cleanDatabase }) => {
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a post by this user
     await createTestPost({
       content: 'Post to be deleted by user',
       authorId: user.id,
     });
 
-    // Login as user
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see the post
     await expect(page.locator('text=Post to be deleted by user')).toBeVisible();
 
-    // Open post actions menu
-    await page.getByTestId('post-actions-menu-trigger').first().click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Should see delete option
-    await expect(page.getByTestId('post-delete-button')).toBeVisible();
+    const deleteButton = page.getByTestId('post-delete-button');
+    await deleteButton.waitFor({ state: 'visible' });
+    await expect(deleteButton).toBeVisible();
+    await deleteButton.click();
 
-    // Click delete
-    await page.getByTestId('post-delete-button').click();
+    const deleteDialog = page.getByTestId('delete-post-dialog');
+    await deleteDialog.waitFor({ state: 'visible' });
+    await expect(deleteDialog).toBeVisible();
 
-    // Confirm deletion in dialog
-    await expect(page.getByTestId('delete-post-dialog')).toBeVisible();
-    await page.getByTestId('delete-post-confirm-button').click();
+    const confirmButton = page.getByTestId('delete-post-confirm-button');
+    await confirmButton.waitFor({ state: 'visible' });
+    await confirmButton.click();
 
-    // Post should disappear from timeline
     await expect(page.locator('text=Post to be deleted by user')).not.toBeVisible();
   });
 
   test('user should NOT be able to edit posts by other users', async ({ page, cleanDatabase }) => {
-    // Create two users
     const user1 = await createTestUser(TEST_USERS.user1);
     const user2 = await createTestUser(TEST_USERS.user2);
 
-    // Create a post by user2
     await createTestPost({
       content: 'Post by another user',
       authorId: user2.id,
     });
 
-    // Login as user1
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see user2's post
     await expect(page.locator('text=Post by another user')).toBeVisible();
 
-    // Should NOT see post actions menu for user2's post
-    // (or if visible, should not have edit/delete options)
     const actionsMenu = page.getByTestId('post-actions-menu-trigger');
     if (await actionsMenu.isVisible()) {
       await actionsMenu.click();
 
-      // Should not see edit or delete options
       await expect(page.getByTestId('post-edit-button')).not.toBeVisible();
       await expect(page.getByTestId('post-delete-button')).not.toBeVisible();
     }
   });
 
   test('user should NOT be able to delete posts by other users', async ({ page, cleanDatabase }) => {
-    // Create two users
     const user1 = await createTestUser(TEST_USERS.user1);
     const user2 = await createTestUser(TEST_USERS.user2);
 
-    // Create a post by user2
     await createTestPost({
       content: 'Post by user2 that user1 cannot delete',
       authorId: user2.id,
     });
 
-    // Login as user1
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see user2's post
     await expect(page.locator('text=Post by user2 that user1 cannot delete')).toBeVisible();
 
-    // Actions menu should not be visible or not have delete option
     const actionsMenu = page.getByTestId('post-actions-menu-trigger');
     if (await actionsMenu.isVisible()) {
       await actionsMenu.click();
@@ -198,13 +235,14 @@ test.describe('User Post Management', () => {
   test('user should see validation error for empty post', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Click create post button
-    await page.getByTestId('create-post-trigger').click();
+    const createPostTrigger = page.getByTestId('create-post-trigger');
+    await createPostTrigger.waitFor({ state: 'visible' });
+    await createPostTrigger.click();
 
-    // Try to submit without content
-    await page.getByTestId('create-post-submit-button').click();
+    const submitButton = page.getByTestId('create-post-submit-button');
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
 
-    // Should show validation error
     await expect(page.getByTestId('create-post-error')).toBeVisible();
     await expect(page.locator('text=/.*cannot be empty.*/i')).toBeVisible();
   });
@@ -212,53 +250,65 @@ test.describe('User Post Management', () => {
   test('user should be able to cancel post creation', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Click create post button
-    await page.getByTestId('create-post-trigger').click();
+    const createPostTrigger = page.getByTestId('create-post-trigger');
+    await createPostTrigger.waitFor({ state: 'visible' });
+    await createPostTrigger.click();
 
-    // Fill in some content
-    await page.getByTestId('create-post-content-input').fill('This post will be cancelled');
+    const contentInput = page.getByTestId('create-post-content-input');
+    await contentInput.waitFor({ state: 'visible' });
+    await contentInput.fill('This post will be cancelled');
 
-    // Click cancel
-    await page.getByTestId('create-post-cancel-button').click();
+    const cancelButton = page.getByTestId('create-post-cancel-button');
+    await cancelButton.waitFor({ state: 'visible' });
+    await cancelButton.click();
 
-    // Dialog should close
     await expect(page.getByTestId('create-post-dialog')).not.toBeVisible();
-
-    // Post should not be created
     await expect(page.locator('text=This post will be cancelled')).not.toBeVisible();
   });
 
   test('user should be able to cancel post edit', async ({ page, cleanDatabase }) => {
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a post by this user
     const originalContent = 'Original post that will not be edited';
     await createTestPost({
       content: originalContent,
       authorId: user.id,
     });
 
-    // Login as user
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Open edit dialog
-    await page.getByTestId('post-actions-menu-trigger').first().click();
-    await page.getByTestId('post-edit-button').click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Change content
-    await page.getByTestId('edit-post-content-input').fill('This edit will be cancelled');
+    const editButton = page.getByTestId('post-edit-button');
+    await editButton.waitFor({ state: 'visible' });
+    await editButton.click();
 
-    // Click cancel
-    await page.getByTestId('edit-post-cancel-button').click();
+    const contentInput = page.getByTestId('edit-post-content-input');
+    await contentInput.waitFor({ state: 'visible' });
+    await contentInput.fill('This edit will be cancelled');
 
-    // Dialog should close
+    const cancelButton = page.getByTestId('edit-post-cancel-button');
+    await cancelButton.waitFor({ state: 'visible' });
+    await cancelButton.click();
+
     await expect(page.getByTestId('edit-post-dialog')).not.toBeVisible();
-
-    // Original content should still be visible
     await expect(page.locator(`text=${originalContent}`)).toBeVisible();
     await expect(page.locator('text=This edit will be cancelled')).not.toBeVisible();
   });
@@ -266,34 +316,46 @@ test.describe('User Post Management', () => {
   test('user should be able to cancel post deletion', async ({ page, cleanDatabase }) => {
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a post by this user
     const postContent = 'Post that will not be deleted';
     await createTestPost({
       content: postContent,
       authorId: user.id,
     });
 
-    // Login as user
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.user1.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.user1.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.user1.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.user1.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Open delete dialog
-    await page.getByTestId('post-actions-menu-trigger').first().click();
-    await page.getByTestId('post-delete-button').click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Dialog should be visible
-    await expect(page.getByTestId('delete-post-dialog')).toBeVisible();
+    const deleteButton = page.getByTestId('post-delete-button');
+    await deleteButton.waitFor({ state: 'visible' });
+    await deleteButton.click();
 
-    // Click cancel
-    await page.getByTestId('delete-post-cancel-button').click();
+    const deleteDialog = page.getByTestId('delete-post-dialog');
+    await deleteDialog.waitFor({ state: 'visible' });
+    await expect(deleteDialog).toBeVisible();
 
-    // Dialog should close
+    const cancelButton = page.getByTestId('delete-post-cancel-button');
+    await cancelButton.waitFor({ state: 'visible' });
+    await cancelButton.click();
+
     await expect(page.getByTestId('delete-post-dialog')).not.toBeVisible();
-
-    // Post should still be visible
     await expect(page.locator(`text=${postContent}`)).toBeVisible();
   });
 });

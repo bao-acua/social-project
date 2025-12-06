@@ -4,228 +4,278 @@ test.describe('Update Profile', () => {
   test('should successfully update full name', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open user menu
-    await page.getByTestId('navbar-user-menu-trigger').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Click update profile
-    await page.getByTestId('navbar-update-profile-button').click();
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
 
-    // Profile modal should open
-    await expect(page.getByTestId('profile-modal')).toBeVisible();
+    const profileModal = page.getByTestId('profile-modal');
+    await profileModal.waitFor({ state: 'visible' });
+    await expect(profileModal).toBeVisible();
 
-    // Change full name
     const newFullName = 'Updated User Name';
-    await page.getByTestId('profile-fullname-input').clear();
-    await page.getByTestId('profile-fullname-input').fill(newFullName);
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    await fullnameInput.clear();
+    await fullnameInput.fill(newFullName);
 
-    // Save changes
-    await page.getByTestId('profile-save-button').click();
+    const saveButton = page.getByTestId('profile-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Modal should close
-    await expect(page.getByTestId('profile-modal')).not.toBeVisible();
+    await expect(profileModal).not.toBeVisible();
 
-    // Reopen profile modal to verify change
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Should see updated full name
-    await expect(page.getByTestId('profile-fullname-input')).toHaveValue(newFullName);
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
+    await fullnameInput.waitFor({ state: 'visible' });
+    await expect(fullnameInput).toHaveValue(newFullName);
   });
 
   test('should show validation error for empty full name', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Clear full name
-    await page.getByTestId('profile-fullname-input').clear();
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
 
-    // Try to save
-    await page.getByTestId('profile-save-button').click();
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    await fullnameInput.clear();
 
-    // Should show error message
+    const saveButton = page.getByTestId('profile-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
+
     await expect(page.getByTestId('profile-error-message')).toBeVisible();
     await expect(page.locator('text=/.*full name.*required.*/i')).toBeVisible();
 
-    // Modal should still be open
-    await expect(page.getByTestId('profile-modal')).toBeVisible();
+    const profileModal = page.getByTestId('profile-modal');
+    await expect(profileModal).toBeVisible();
   });
 
   test('should cancel profile update', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Get original full name
-    const originalFullName = await page.getByTestId('profile-fullname-input').inputValue();
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
 
-    // Change full name
-    await page.getByTestId('profile-fullname-input').clear();
-    await page.getByTestId('profile-fullname-input').fill('This will be cancelled');
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    const originalFullName = await fullnameInput.inputValue();
 
-    // Click cancel
-    await page.getByTestId('profile-cancel-button').click();
+    await fullnameInput.clear();
+    await fullnameInput.fill('This will be cancelled');
 
-    // Modal should close
-    await expect(page.getByTestId('profile-modal')).not.toBeVisible();
+    const cancelButton = page.getByTestId('profile-cancel-button');
+    await cancelButton.waitFor({ state: 'visible' });
+    await cancelButton.click();
 
-    // Reopen and verify original name is still there
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const profileModal = page.getByTestId('profile-modal');
+    await expect(profileModal).not.toBeVisible();
 
-    await expect(page.getByTestId('profile-fullname-input')).toHaveValue(originalFullName);
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
+
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
+    await fullnameInput.waitFor({ state: 'visible' });
+    await expect(fullnameInput).toHaveValue(originalFullName);
   });
 
   test('should display username as read-only', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Username field should be disabled
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
     const usernameInput = page.locator('#username');
+    await usernameInput.waitFor({ state: 'visible' });
     await expect(usernameInput).toBeDisabled();
-
-    // Should display current username
     await expect(usernameInput).toHaveValue(authenticatedUser.username);
-
-    // Should see message that username cannot be changed
     await expect(page.locator('text=/.*username.*cannot.*changed.*/i')).toBeVisible();
   });
 
   test('should display initials as read-only and auto-generated', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Initials field should be disabled
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
     const initialsInput = page.locator('#initials');
+    await initialsInput.waitFor({ state: 'visible' });
     await expect(initialsInput).toBeDisabled();
-
-    // Should see message that initials are auto-generated
     await expect(page.locator('text=/.*auto-generated.*/i')).toBeVisible();
   });
 
   test('should update initials when full name changes', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Change full name to something with clear initials
-    await page.getByTestId('profile-fullname-input').clear();
-    await page.getByTestId('profile-fullname-input').fill('Alice Bob');
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
 
-    // Save changes
-    await page.getByTestId('profile-save-button').click();
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    await fullnameInput.clear();
+    await fullnameInput.fill('Alice Bob');
 
-    // Wait for modal to close
-    await expect(page.getByTestId('profile-modal')).not.toBeVisible();
+    const saveButton = page.getByTestId('profile-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Reopen modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const profileModal = page.getByTestId('profile-modal');
+    await expect(profileModal).not.toBeVisible();
 
-    // Initials should be updated to "AB"
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
+
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
     const initialsInput = page.locator('#initials');
+    await initialsInput.waitFor({ state: 'visible' });
     await expect(initialsInput).toHaveValue('AB');
   });
 
   test('should reflect updated full name in navbar', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Change full name
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
     const newFullName = 'New Display Name';
-    await page.getByTestId('profile-fullname-input').clear();
-    await page.getByTestId('profile-fullname-input').fill(newFullName);
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    await fullnameInput.clear();
+    await fullnameInput.fill(newFullName);
 
-    // Save changes
-    await page.getByTestId('profile-save-button').click();
+    const saveButton = page.getByTestId('profile-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Wait for modal to close
-    await expect(page.getByTestId('profile-modal')).not.toBeVisible();
+    const profileModal = page.getByTestId('profile-modal');
+    await expect(profileModal).not.toBeVisible();
 
-    // Open user menu again
-    await page.getByTestId('navbar-user-menu-trigger').click();
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Should see updated full name in dropdown
     await expect(page.locator(`text=${newFullName}`)).toBeVisible();
   });
 
   test('should validate full name length', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Try to enter a very long name (> 100 characters)
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
     const longName = 'A'.repeat(101);
-    await page.getByTestId('profile-fullname-input').clear();
-    await page.getByTestId('profile-fullname-input').fill(longName);
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    await fullnameInput.clear();
+    await fullnameInput.fill(longName);
 
-    // Try to save
-    await page.getByTestId('profile-save-button').click();
+    const saveButton = page.getByTestId('profile-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Should show error (either via input maxLength or server validation)
-    // If maxLength is set, the input will prevent typing beyond 100
-    // Let's check that the input value is capped
-    const inputValue = await page.getByTestId('profile-fullname-input').inputValue();
+    const inputValue = await fullnameInput.inputValue();
     expect(inputValue.length).toBeLessThanOrEqual(100);
   });
 
   test('should close modal when clicking outside or pressing escape', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Modal should be visible
-    await expect(page.getByTestId('profile-modal')).toBeVisible();
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
 
-    // Press Escape key
+    const profileModal = page.getByTestId('profile-modal');
+    await profileModal.waitFor({ state: 'visible' });
+    await expect(profileModal).toBeVisible();
+
     await page.keyboard.press('Escape');
 
-    // Modal should close
-    await expect(page.getByTestId('profile-modal')).not.toBeVisible();
+    await expect(profileModal).not.toBeVisible();
   });
 
   test('should persist profile changes after page reload', async ({ page, authenticatedUser }) => {
     await page.goto('/timeline');
 
-    // Open profile modal and update name
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    const userMenuTrigger = page.getByTestId('navbar-user-menu-trigger');
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
+
+    const updateProfileButton = page.getByTestId('navbar-update-profile-button');
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
 
     const newFullName = 'Persisted Name Change';
-    await page.getByTestId('profile-fullname-input').clear();
-    await page.getByTestId('profile-fullname-input').fill(newFullName);
-    await page.getByTestId('profile-save-button').click();
+    const fullnameInput = page.getByTestId('profile-fullname-input');
+    await fullnameInput.waitFor({ state: 'visible' });
+    await fullnameInput.clear();
+    await fullnameInput.fill(newFullName);
 
-    // Wait for modal to close
-    await expect(page.getByTestId('profile-modal')).not.toBeVisible();
+    const saveButton = page.getByTestId('profile-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Reload page
+    const profileModal = page.getByTestId('profile-modal');
+    await expect(profileModal).not.toBeVisible();
+
     await page.reload();
 
-    // Open profile modal again
-    await page.getByTestId('navbar-user-menu-trigger').click();
-    await page.getByTestId('navbar-update-profile-button').click();
+    await userMenuTrigger.waitFor({ state: 'visible' });
+    await userMenuTrigger.click();
 
-    // Should still have the updated name
-    await expect(page.getByTestId('profile-fullname-input')).toHaveValue(newFullName);
+    await updateProfileButton.waitFor({ state: 'visible' });
+    await updateProfileButton.click();
+
+    await fullnameInput.waitFor({ state: 'visible' });
+    await expect(fullnameInput).toHaveValue(newFullName);
   });
 });

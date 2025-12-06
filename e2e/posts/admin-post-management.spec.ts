@@ -4,49 +4,57 @@ import { TEST_USERS, TEST_POSTS } from '../fixtures/test-data';
 
 test.describe('Admin Post Management', () => {
   test('admin should be able to delete any user post', async ({ page, cleanDatabase }) => {
-    // Create admin and regular user
     const admin = await createTestUser(TEST_USERS.admin);
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a post by regular user
     const post = await createTestPost({
       content: TEST_POSTS.post1.content,
       authorId: user.id,
     });
 
-    // Login as admin
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.admin.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.admin.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.admin.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.admin.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see the user's post
     await expect(page.locator(`text=${TEST_POSTS.post1.content}`)).toBeVisible();
 
-    // Open post actions menu
-    await page.getByTestId('post-actions-menu-trigger').first().click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Should see delete option
-    await expect(page.getByTestId('post-delete-button')).toBeVisible();
+    const deleteButton = page.getByTestId('post-delete-button');
+    await deleteButton.waitFor({ state: 'visible' });
+    await expect(deleteButton).toBeVisible();
+    await deleteButton.click();
 
-    // Click delete
-    await page.getByTestId('post-delete-button').click();
+    const deleteDialog = page.getByTestId('delete-post-dialog');
+    await deleteDialog.waitFor({ state: 'visible' });
+    await expect(deleteDialog).toBeVisible();
 
-    // Confirm deletion in dialog
-    await expect(page.getByTestId('delete-post-dialog')).toBeVisible();
-    await page.getByTestId('delete-post-confirm-button').click();
+    const confirmButton = page.getByTestId('delete-post-confirm-button');
+    await confirmButton.waitFor({ state: 'visible' });
+    await confirmButton.click();
 
-    // Post should disappear from timeline
     await expect(page.locator(`text=${TEST_POSTS.post1.content}`)).not.toBeVisible();
   });
 
   test('admin should be able to see deleted posts in timeline', async ({ page, cleanDatabase }) => {
-    // Create admin and regular user
     const admin = await createTestUser(TEST_USERS.admin);
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a deleted post
     const deletedPost = await createTestPost({
       content: TEST_POSTS.deletedPost.content,
       authorId: user.id,
@@ -54,19 +62,23 @@ test.describe('Admin Post Management', () => {
       deletedBy: admin.id,
     });
 
-    // Login as admin
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.admin.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.admin.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.admin.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.admin.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Admin should see deleted post (backend should return deleted posts for admin)
-    // Note: This depends on your backend implementation
-    // If your backend filters deleted posts for everyone, this test might need adjustment
-
-    // For now, we'll test that after admin deletes a post, they can verify it's gone
-    // Create an active post first
     const activePost = await createTestPost({
       content: 'Active post for admin test',
       authorId: user.id,
@@ -74,89 +86,102 @@ test.describe('Admin Post Management', () => {
 
     await page.reload();
 
-    // Should see the active post
     await expect(page.locator('text=Active post for admin test')).toBeVisible();
   });
 
   test('admin should be able to edit posts they own', async ({ page, cleanDatabase }) => {
-    // Create admin
     const admin = await createTestUser(TEST_USERS.admin);
 
-    // Create a post by admin
     const post = await createTestPost({
       content: 'Admin original post content',
       authorId: admin.id,
     });
 
-    // Login as admin
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.admin.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.admin.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.admin.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.admin.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see the post
     await expect(page.locator('text=Admin original post content')).toBeVisible();
 
-    // Open post actions menu
-    await page.getByTestId('post-actions-menu-trigger').first().click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Should see edit option
-    await expect(page.getByTestId('post-edit-button')).toBeVisible();
+    const editButton = page.getByTestId('post-edit-button');
+    await editButton.waitFor({ state: 'visible' });
+    await expect(editButton).toBeVisible();
+    await editButton.click();
 
-    // Click edit
-    await page.getByTestId('post-edit-button').click();
+    const editDialog = page.getByTestId('edit-post-dialog');
+    await editDialog.waitFor({ state: 'visible' });
+    await expect(editDialog).toBeVisible();
 
-    // Edit dialog should open
-    await expect(page.getByTestId('edit-post-dialog')).toBeVisible();
-
-    // Change content
     const newContent = 'Admin edited post content';
-    await page.getByTestId('edit-post-content-input').fill(newContent);
+    const contentInput = page.getByTestId('edit-post-content-input');
+    await contentInput.waitFor({ state: 'visible' });
+    await contentInput.fill(newContent);
 
-    // Save changes
-    await page.getByTestId('edit-post-save-button').click();
+    const saveButton = page.getByTestId('edit-post-save-button');
+    await saveButton.waitFor({ state: 'visible' });
+    await saveButton.click();
 
-    // Should see updated content
     await expect(page.locator(`text=${newContent}`)).toBeVisible();
     await expect(page.locator('text=Admin original post content')).not.toBeVisible();
   });
 
   test('admin should NOT be able to edit posts by other users', async ({ page, cleanDatabase }) => {
-    // Create admin and regular user
     const admin = await createTestUser(TEST_USERS.admin);
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create a post by regular user
     const post = await createTestPost({
       content: 'User post that admin cannot edit',
       authorId: user.id,
     });
 
-    // Login as admin
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.admin.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.admin.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.admin.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.admin.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Should see the user's post
     await expect(page.locator('text=User post that admin cannot edit')).toBeVisible();
 
-    // Open post actions menu
-    await page.getByTestId('post-actions-menu-trigger').first().click();
+    const actionsMenuTrigger = page.getByTestId('post-actions-menu-trigger').first();
+    await actionsMenuTrigger.waitFor({ state: 'visible' });
+    await actionsMenuTrigger.click();
 
-    // Should see delete but NOT edit option
     await expect(page.getByTestId('post-delete-button')).toBeVisible();
     await expect(page.getByTestId('post-edit-button')).not.toBeVisible();
   });
 
   test('admin can delete multiple posts', async ({ page, cleanDatabase }) => {
-    // Create admin and regular user
     const admin = await createTestUser(TEST_USERS.admin);
     const user = await createTestUser(TEST_USERS.user1);
 
-    // Create multiple posts by user
     await createTestPost({
       content: 'User post 1',
       authorId: user.id,
@@ -166,27 +191,49 @@ test.describe('Admin Post Management', () => {
       authorId: user.id,
     });
 
-    // Login as admin
     await page.goto('/login');
-    await page.getByTestId('login-username-input').fill(TEST_USERS.admin.username);
-    await page.getByTestId('login-password-input').fill(TEST_USERS.admin.password);
-    await page.getByTestId('login-submit-button').click();
+
+    const usernameInput = page.getByTestId('login-username-input');
+    const passwordInput = page.getByTestId('login-password-input');
+    const submitButton = page.getByTestId('login-submit-button');
+
+    await usernameInput.waitFor({ state: 'visible' });
+    await usernameInput.fill(TEST_USERS.admin.username);
+
+    await passwordInput.waitFor({ state: 'visible' });
+    await passwordInput.fill(TEST_USERS.admin.password);
+
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
+
     await page.waitForURL('/timeline');
 
-    // Delete first post
-    await page.getByTestId('post-actions-menu-trigger').first().click();
-    await page.getByTestId('post-delete-button').click();
-    await page.getByTestId('delete-post-confirm-button').click();
+    const firstActionsMenu = page.getByTestId('post-actions-menu-trigger').first();
+    await firstActionsMenu.waitFor({ state: 'visible' });
+    await firstActionsMenu.click();
 
-    // Wait for first post to disappear
+    const firstDeleteButton = page.getByTestId('post-delete-button');
+    await firstDeleteButton.waitFor({ state: 'visible' });
+    await firstDeleteButton.click();
+
+    const firstConfirmButton = page.getByTestId('delete-post-confirm-button');
+    await firstConfirmButton.waitFor({ state: 'visible' });
+    await firstConfirmButton.click();
+
     await expect(page.locator('text=User post 1')).not.toBeVisible();
 
-    // Delete second post
-    await page.getByTestId('post-actions-menu-trigger').first().click();
-    await page.getByTestId('post-delete-button').click();
-    await page.getByTestId('delete-post-confirm-button').click();
+    const secondActionsMenu = page.getByTestId('post-actions-menu-trigger').first();
+    await secondActionsMenu.waitFor({ state: 'visible' });
+    await secondActionsMenu.click();
 
-    // Wait for second post to disappear
+    const secondDeleteButton = page.getByTestId('post-delete-button');
+    await secondDeleteButton.waitFor({ state: 'visible' });
+    await secondDeleteButton.click();
+
+    const secondConfirmButton = page.getByTestId('delete-post-confirm-button');
+    await secondConfirmButton.waitFor({ state: 'visible' });
+    await secondConfirmButton.click();
+
     await expect(page.locator('text=User post 2')).not.toBeVisible();
   });
 });
