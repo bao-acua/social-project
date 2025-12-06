@@ -38,8 +38,8 @@ import { useAuth } from '@/context/auth-context'
 interface CommentProps {
   comment: CommentResponse
   postId: string
-  onCommentUpdated?: () => void
-  onCommentDeleted?: () => void
+  onCommentUpdated?: (updatedComment: Partial<CommentResponse> & { id: string }) => void
+  onCommentDeleted?: (commentId: string) => void
 }
 
 export function Comment({ comment, postId, onCommentUpdated, onCommentDeleted }: CommentProps) {
@@ -99,13 +99,16 @@ export function Comment({ comment, postId, onCommentUpdated, onCommentDeleted }:
         utils.comments.getCommentsByPost.setData({ postId, limit: 20, offset: 0 }, context.previousComments)
       }
     },
-    onSuccess: () => {
+    onSuccess: (_result, variables) => {
       setEditDialogOpen(false)
       setEditError('')
-      onCommentUpdated?.()
-    },
-    onSettled: () => {
-      utils.comments.getCommentsByPost.invalidate({ postId })
+      onCommentUpdated?.({
+        id: variables.id,
+        content: variables.content,
+        isEdited: true,
+        editedAt: new Date(),
+        editedByAdmin: user?.role === 'admin' && comment.author.id !== user?.id,
+      })
     },
   })
 
@@ -139,13 +142,9 @@ export function Comment({ comment, postId, onCommentUpdated, onCommentDeleted }:
         utils.comments.getCommentsByPost.setData({ postId, limit: 20, offset: 0 }, context.previousComments)
       }
     },
-    onSuccess: () => {
+    onSuccess: (_result, variables) => {
       setDeleteDialogOpen(false)
-      onCommentDeleted?.()
-      onCommentUpdated?.()
-    },
-    onSettled: () => {
-      utils.comments.getCommentsByPost.invalidate({ postId })
+      onCommentDeleted?.(variables.id)
     },
   })
 

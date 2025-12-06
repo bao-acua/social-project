@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Comment } from '@/components/comment'
+import { useAuth } from '@/context/auth-context'
 import type { CommentResponse } from 'shared'
 
 const COMMENTS_PER_PAGE = 10
@@ -20,8 +21,7 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
   const [offset, setOffset] = useState(0)
   const [allComments, setAllComments] = useState<CommentResponse[]>([])
   const [error, setError] = useState('')
-
-  const utils = trpc.useUtils()
+  const { user } = useAuth()
 
   const {
     data,
@@ -155,14 +155,26 @@ export function CommentSection({ postId, onCommentCountChange }: CommentSectionP
               <Comment
                 comment={comment}
                 postId={postId}
-                onCommentDeleted={() => {
-                  // Decrease count when comment is deleted
-                  onCommentCountChange?.(-1)
+                onCommentDeleted={(commentId) => {
+                  const isAdmin = user?.role === 'admin'
+
+                  if (isAdmin) {
+                    setAllComments(prev =>
+                      prev.map(c =>
+                        c.id === commentId
+                          ? { ...c, isDeleted: true, deletedAt: new Date() }
+                          : c
+                      )
+                    )
+                  } else {
+                    setAllComments(prev => prev.filter(c => c.id !== commentId))
+                    onCommentCountChange?.(-1)
+                  }
                 }}
-                onCommentUpdated={() => {
-                  setOffset(0)
-                  setAllComments([])
-                  utils.comments.getCommentsByPost.invalidate({ postId })
+                onCommentUpdated={(updatedComment) => {
+                  setAllComments(prev =>
+                    prev.map(c => (c.id === updatedComment.id ? { ...c, ...updatedComment } : c))
+                  )
                 }}
               />
             </div>
