@@ -51,24 +51,82 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
   const utils = trpc.useUtils()
 
   const updateCommentMutation = trpc.comments.updateComment.useMutation({
+    onMutate: async (variables) => {
+      await utils.comments.getCommentsByPost.cancel({ postId })
+      const previousComments = utils.comments.getCommentsByPost.getData({ postId, limit: 20, offset: 0 })
+      utils.comments.getCommentsByPost.setData({ postId, limit: 20, offset: 0 }, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          comments: old.comments.map((c) =>
+            c.id === variables.id
+              ? {
+                  ...c,
+                  content: variables.content,
+                  isEdited: true,
+                  editedAt: new Date(),
+                  editedByAdmin: user?.role === 'admin' && c.author.id !== user?.id,
+                }
+              : c
+          ),
+        }
+      })
+
+      return { previousComments }
+    },
+    onError: (err, variables, context) => {
+      setEditError(err.message || 'Failed to update comment')
+      // Rollback on error
+      if (context?.previousComments) {
+        utils.comments.getCommentsByPost.setData({ postId, limit: 20, offset: 0 }, context.previousComments)
+      }
+    },
     onSuccess: () => {
-      utils.comments.getCommentsByPost.invalidate({ postId })
-      utils.posts.getTimeline.invalidate()
       setEditDialogOpen(false)
       setEditError('')
       onCommentUpdated?.()
     },
-    onError: (err) => {
-      setEditError(err.message || 'Failed to update comment')
+    onSettled: () => {
+      utils.comments.getCommentsByPost.invalidate({ postId })
     },
   })
 
   const deleteCommentMutation = trpc.comments.deleteComment.useMutation({
+    onMutate: async (variables) => {
+      await utils.comments.getCommentsByPost.cancel({ postId })
+      const previousComments = utils.comments.getCommentsByPost.getData({ postId, limit: 20, offset: 0 })
+      const isAdmin = user?.role === 'admin'
+      utils.comments.getCommentsByPost.setData({ postId, limit: 20, offset: 0 }, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          comments: isAdmin
+            ? old.comments.map((c) =>
+                c.id === variables.id
+                  ? { ...c, isDeleted: true, deletedAt: new Date() }
+                  : c
+              )
+            : old.comments.filter((c) => c.id !== variables.id),
+          pagination: {
+            ...old.pagination,
+            total: isAdmin ? old.pagination.total : old.pagination.total - 1,
+          },
+        }
+      })
+
+      return { previousComments }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousComments) {
+        utils.comments.getCommentsByPost.setData({ postId, limit: 20, offset: 0 }, context.previousComments)
+      }
+    },
     onSuccess: () => {
-      utils.comments.getCommentsByPost.invalidate({ postId })
-      utils.posts.getTimeline.invalidate()
       setDeleteDialogOpen(false)
       onCommentUpdated?.()
+    },
+    onSettled: () => {
+      utils.comments.getCommentsByPost.invalidate({ postId })
     },
   })
 
@@ -104,7 +162,7 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
 
   return (
     <>
-      <div className={`flex gap-3 pl-4 ${comment.isDeleted ? 'opacity-70' : ''}`}>
+      <div className={`flex gap-3 pl-4 transition-all duration-300 ease-in-out ${comment.isDeleted ? 'opacity-70 scale-[0.98]' : 'opacity-100 scale-100'}`}>
         <Avatar className="w-8 h-8">
           <AvatarImage src="" alt={comment.author.fullName} />
           <AvatarFallback className="text-xs">
@@ -160,7 +218,7 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
               </DropdownMenu>
             )}
           </div>
-          <p className={`text-sm whitespace-pre-wrap ${comment.isDeleted ? 'line-through text-muted-foreground' : ''}`}>
+          <p className={`text-sm whitespace-pre-wrap transition-all duration-200 ${comment.isDeleted ? 'line-through text-muted-foreground' : ''}`}>
             {comment.content}
           </p>
         </div>

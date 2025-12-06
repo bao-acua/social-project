@@ -26,16 +26,90 @@ export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps
   const utils = trpc.useUtils()
 
   const updatePostMutation = trpc.posts.updatePost.useMutation({
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await utils.posts.getTimeline.cancel()
+
+      // Snapshot previous value
+      const previousTimeline = utils.posts.getTimeline.getData()
+
+      // Optimistically update
+      utils.posts.getTimeline.setData(undefined, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          posts: old.posts.map((p) =>
+            p.id === variables.id
+              ? {
+                  ...p,
+                  content: variables.content,
+                  isEdited: true,
+                  editedAt: new Date(),
+                  editedByAdmin: isAdmin && p.author.id !== currentUserId,
+                }
+              : p
+          ),
+        }
+      })
+
+      return { previousTimeline }
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousTimeline) {
+        utils.posts.getTimeline.setData(undefined, context.previousTimeline)
+      }
+    },
     onSuccess: () => {
-      utils.posts.getTimeline.invalidate()
       setEditDialogOpen(false)
+    },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      utils.posts.getTimeline.invalidate()
     },
   })
 
   const deletePostMutation = trpc.posts.deletePost.useMutation({
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await utils.posts.getTimeline.cancel()
+
+      // Snapshot previous value
+      const previousTimeline = utils.posts.getTimeline.getData()
+
+      // Optimistically update (mark as deleted for admin, remove for users)
+      utils.posts.getTimeline.setData(undefined, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          posts: isAdmin
+            ? old.posts.map((p) =>
+                p.id === variables.id
+                  ? { ...p, isDeleted: true, deletedAt: new Date() }
+                  : p
+              )
+            : old.posts.filter((p) => p.id !== variables.id),
+          pagination: {
+            ...old.pagination,
+            total: isAdmin ? old.pagination.total : old.pagination.total - 1,
+          },
+        }
+      })
+
+      return { previousTimeline }
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousTimeline) {
+        utils.posts.getTimeline.setData(undefined, context.previousTimeline)
+      }
+    },
     onSuccess: () => {
-      utils.posts.getTimeline.invalidate()
       setDeleteDialogOpen(false)
+    },
+    onSettled: () => {
+      // Refetch to ensure data consistency
+      utils.posts.getTimeline.invalidate()
     },
   })
 
@@ -55,12 +129,12 @@ export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps
   }
 
   const isOwnPost = currentUserId === post.author.id
-  const canEdit = isOwnPost || isAdmin
-  const canDelete = isOwnPost || isAdmin
+  const canEdit = !!(isOwnPost || isAdmin)
+  const canDelete = !!(isOwnPost || isAdmin)
 
   return (
     <>
-      <Card className={`mb-4 ${post.isDeleted ? 'opacity-70' : ''}`}>
+      <Card className={`mb-4 transition-all duration-300 ease-in-out ${post.isDeleted ? 'opacity-70 scale-[0.99]' : 'opacity-100 scale-100'}`}>
         <CardHeader>
           <div className="flex items-start justify-between">
             <PostHeader
@@ -82,7 +156,7 @@ export function EnhancedPostCard({ post, currentUserId, isAdmin }: PostCardProps
         </CardHeader>
         <CardContent>
           <p
-            className={`mb-4 whitespace-pre-wrap ${
+            className={`mb-4 whitespace-pre-wrap transition-all duration-200 ${
               post.isDeleted ? 'line-through text-muted-foreground' : ''
             }`}
           >

@@ -38,12 +38,12 @@ export function CommentSection({ postId }: CommentSectionProps) {
   )
 
   const createCommentMutation = trpc.comments.createComment.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       setNewComment('')
       setError('')
-      setOffset(0)
-      setAllComments([])
-      utils.comments.getCommentsByPost.invalidate({ postId })
+      // Don't reset - just add the new comment to the top
+      setAllComments(prev => [result.comment, ...prev])
+      // Only invalidate to update counts, not refetch all comments
       utils.posts.getTimeline.invalidate()
     },
     onError: (err) => {
@@ -145,17 +145,22 @@ export function CommentSection({ postId }: CommentSectionProps) {
         </div>
       ) : (
         <div className="space-y-3">
-          {allComments.map((comment) => (
-            <Comment
+          {allComments.map((comment, index) => (
+            <div
               key={comment.id}
-              comment={comment}
-              postId={postId}
-              onCommentUpdated={() => {
-                setOffset(0)
-                setAllComments([])
-                utils.comments.getCommentsByPost.invalidate({ postId })
-              }}
-            />
+              className="animate-in fade-in slide-in-from-top-2 duration-300"
+              style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
+            >
+              <Comment
+                comment={comment}
+                postId={postId}
+                onCommentUpdated={() => {
+                  setOffset(0)
+                  setAllComments([])
+                  utils.comments.getCommentsByPost.invalidate({ postId })
+                }}
+              />
+            </div>
           ))}
 
           {hasMore && (
