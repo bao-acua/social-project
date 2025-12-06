@@ -18,20 +18,26 @@ export function useInfiniteScroll({
   const loadMoreRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!loadMoreRef.current || !hasNextPage || isLoading) {
+    const element = loadMoreRef.current
+
+    if (!element || !hasNextPage || isLoading) {
       return
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage && !isLoading) {
+        const entry = entries[0]
+        if (entry?.isIntersecting && hasNextPage && !isLoading) {
           onLoadMore()
         }
       },
-      { threshold }
+      {
+        threshold,
+        rootMargin: '100px', // Trigger 100px before the element comes into view
+      }
     )
 
-    observer.observe(loadMoreRef.current)
+    observer.observe(element)
 
     return () => {
       observer.disconnect()

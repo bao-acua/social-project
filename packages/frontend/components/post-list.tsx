@@ -76,19 +76,11 @@ export const PostList = forwardRef<HTMLDivElement, PostListProps>(
           ))}
         </div>
 
-        <div ref={loadMoreRef} className="mt-4">
-          {isLoading && (
-            <div className="text-center py-4">
+        {hasNextPage && (
+          <div ref={loadMoreRef} className="mt-4 h-20 flex items-center justify-center">
+            {isLoading && (
               <p className="text-muted-foreground">Loading more posts...</p>
-            </div>
-          )}
-        </div>
-
-        {hasNextPage && !isLoading && (
-          <div className="text-center mt-4">
-            <Button variant="outline" onClick={onLoadMore}>
-              Load More
-            </Button>
+            )}
           </div>
         )}
 
