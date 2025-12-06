@@ -38,8 +38,6 @@ export function EnhancedPostCard({
       await utils.posts.getTimeline.cancel()
       await utils.posts.searchPosts.cancel()
 
-      const previousData: Array<{ type: string; data: unknown }> = []
-
       const updatedPostData = {
         id: variables.id,
         content: variables.content,
@@ -48,48 +46,8 @@ export function EnhancedPostCard({
         editedByAdmin: isAdmin && post.author?.id !== currentUserId,
       }
 
+      // Update local state immediately - this provides instant feedback
       onPostUpdated?.(updatedPostData)
-
-      utils.posts.getTimeline.setQueriesData({}, (old) => {
-        if (!old) return old
-        previousData.push({ type: 'timeline', data: old })
-        return {
-          ...old,
-          posts: old.posts.map((p) =>
-            p.id === variables.id
-              ? { ...p, ...updatedPostData }
-              : p
-          ),
-        }
-      })
-
-      // Update all search queries with optimistic data
-      utils.posts.searchPosts.setQueriesData({}, (old) => {
-        if (!old) return old
-        previousData.push({ type: 'search', data: old })
-        return {
-          ...old,
-          posts: old.posts.map((p) =>
-            p.id === variables.id
-              ? { ...p, ...updatedPostData }
-              : p
-          ),
-        }
-      })
-
-      return { previousData }
-    },
-    onError: (err, variables, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        context.previousData.forEach(({ type, data }) => {
-          if (type === 'timeline') {
-            utils.posts.getTimeline.setQueriesData({}, data)
-          } else if (type === 'search') {
-            utils.posts.searchPosts.setQueriesData({}, data)
-          }
-        })
-      }
     },
     onSuccess: () => {
       setEditDialogOpen(false)
@@ -98,69 +56,11 @@ export function EnhancedPostCard({
 
   const deletePostMutation = trpc.posts.deletePost.useMutation({
     onMutate: async (variables) => {
-      // Cancel outgoing refetches
       await utils.posts.getTimeline.cancel()
       await utils.posts.searchPosts.cancel()
 
-      // Snapshot previous values
-      const previousData: Array<{ type: string; data: unknown }> = []
-
-      // Update local state immediately
+      // Update local state immediately - this provides instant feedback
       onPostDeleted?.(variables.id, isAdmin || false)
-
-      // Optimistically update all timeline queries (mark as deleted for admin, remove for users)
-      utils.posts.getTimeline.setQueriesData({}, (old) => {
-        if (!old) return old
-        previousData.push({ type: 'timeline', data: old })
-        return {
-          ...old,
-          posts: isAdmin
-            ? old.posts.map((p) =>
-                p.id === variables.id
-                  ? { ...p, isDeleted: true, deletedAt: new Date() }
-                  : p
-              )
-            : old.posts.filter((p) => p.id !== variables.id),
-          pagination: {
-            ...old.pagination,
-            total: isAdmin ? old.pagination.total : old.pagination.total - 1,
-          },
-        }
-      })
-
-      // Optimistically update all search queries
-      utils.posts.searchPosts.setQueriesData({}, (old) => {
-        if (!old) return old
-        previousData.push({ type: 'search', data: old })
-        return {
-          ...old,
-          posts: isAdmin
-            ? old.posts.map((p) =>
-                p.id === variables.id
-                  ? { ...p, isDeleted: true, deletedAt: new Date() }
-                  : p
-              )
-            : old.posts.filter((p) => p.id !== variables.id),
-          pagination: {
-            ...old.pagination,
-            total: isAdmin ? old.pagination.total : old.pagination.total - 1,
-          },
-        }
-      })
-
-      return { previousData }
-    },
-    onError: (err, variables, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        context.previousData.forEach(({ type, data }) => {
-          if (type === 'timeline') {
-            utils.posts.getTimeline.setQueriesData({}, data)
-          } else if (type === 'search') {
-            utils.posts.searchPosts.setQueriesData({}, data)
-          }
-        })
-      }
     },
     onSuccess: () => {
       setDeleteDialogOpen(false)

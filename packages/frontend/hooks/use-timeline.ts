@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { trpc } from '@/lib/trpc'
 import type { PostResponse } from 'shared'
 
@@ -17,6 +17,7 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
   const [searchInput, setSearchInput] = useState('')
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const isFetchingRef = useRef(false)
 
   // Timeline query
   const {
@@ -64,12 +65,14 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
       setAllPosts(prev => {
         if (offset === 0) {
           setIsFetchingMore(false)
+          isFetchingRef.current = false
           return data.posts
         }
         const newPosts = data.posts.filter(
           post => !prev.some(p => p.id === post.id)
         )
         setIsFetchingMore(false)
+        isFetchingRef.current = false
         return [...prev, ...newPosts]
       })
     }
@@ -78,10 +81,26 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
   const hasNextPage = data ? (offset + POSTS_PER_PAGE) < data.pagination.total : false
 
   const fetchNextPage = useCallback(() => {
-    if (!hasNextPage || isFetchingMore) return
+    // Prevent duplicate requests
+    if (isFetchingRef.current) return
+
+    const currentData = isSearchMode ? searchData : timelineData
+    const currentHasNextPage = currentData ? (offset + POSTS_PER_PAGE) < currentData.pagination.total : false
+
+    if (!currentHasNextPage) return
+
+    isFetchingRef.current = true
     setIsFetchingMore(true)
     setOffset(prev => prev + POSTS_PER_PAGE)
-  }, [hasNextPage, isFetchingMore])
+  }, [offset, isSearchMode, searchData, timelineData])
+
+  const handleClearSearch = useCallback(() => {
+    setSearchInput('')
+    setSearchQuery('')
+    setIsSearchMode(false)
+    setOffset(0)
+    setAllPosts([])
+  }, [])
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -93,15 +112,7 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
     setIsSearchMode(true)
     setOffset(0)
     setAllPosts([])
-  }, [searchInput])
-
-  const handleClearSearch = useCallback(() => {
-    setSearchInput('')
-    setSearchQuery('')
-    setIsSearchMode(false)
-    setOffset(0)
-    setAllPosts([])
-  }, [])
+  }, [searchInput, handleClearSearch])
 
   const handlePostCreated = useCallback(() => {
     if (!isSearchMode) {

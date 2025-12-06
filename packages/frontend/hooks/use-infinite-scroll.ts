@@ -16,33 +16,55 @@ export function useInfiniteScroll({
   threshold = 0.1,
 }: UseInfiniteScrollOptions) {
   const loadMoreRef = useRef<HTMLDivElement>(null)
+  const onLoadMoreRef = useRef(onLoadMore)
+
+  // Keep the callback ref updated
+  useEffect(() => {
+    onLoadMoreRef.current = onLoadMore
+  }, [onLoadMore])
 
   useEffect(() => {
-    const element = loadMoreRef.current
+    // Wait for the element to be available in the DOM
+    // This is necessary because the element is conditionally rendered
+    const checkAndObserve = () => {
+      const element = loadMoreRef.current
 
-    if (!element || !hasNextPage || isLoading) {
-      return
+      if (!element || !hasNextPage || isLoading) {
+        return null
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0]
+          if (entry?.isIntersecting && hasNextPage && !isLoading) {
+            onLoadMoreRef.current()
+          }
+        },
+        {
+          threshold,
+          rootMargin: '100px', // Trigger 100px before the element comes into view
+        }
+      )
+
+      observer.observe(element)
+      return observer
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        if (entry?.isIntersecting && hasNextPage && !isLoading) {
-          onLoadMore()
-        }
-      },
-      {
-        threshold,
-        rootMargin: '100px', // Trigger 100px before the element comes into view
-      }
-    )
+    // Try immediately
+    let observer = checkAndObserve()
 
-    observer.observe(element)
+    // If no element yet, retry after a short delay to let React attach the ref
+    const timeoutId = !observer && hasNextPage && !isLoading
+      ? setTimeout(() => {
+          observer = checkAndObserve()
+        }, 100)
+      : undefined
 
     return () => {
-      observer.disconnect()
+      if (timeoutId) clearTimeout(timeoutId)
+      if (observer) observer.disconnect()
     }
-  }, [hasNextPage, isLoading, onLoadMore, threshold])
+  }, [hasNextPage, isLoading, threshold])
 
   return { loadMoreRef }
 }
