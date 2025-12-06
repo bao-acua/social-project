@@ -8,28 +8,50 @@ A full-stack social media application built with modern web technologies, optimi
 - **Frontend**: Next.js 14 + React + TailwindCSS + Radix UI
 - **Monorepo**: npm workspaces with shared TypeScript types
 
-## Quick Start
+## Setup Instructions
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Set Up Environment
+### 2. Database Setup
+
+Make sure PostgreSQL is installed and running on your machine, then create a database:
+
 ```bash
-# Backend
+# Create database (using psql or your preferred PostgreSQL client)
+createdb social_project_db
+```
+
+### 3. Environment Variables
+
+**Backend (.env):**
+```bash
 cd packages/backend
 cp .env.example .env
-# Edit .env with your database credentials
+```
 
-# Frontend
+Edit `packages/backend/.env` with your configuration:
+```env
+NODE_ENV=development
+PORT=3000
+HOST=0.0.0.0
+DATABASE_URL=postgres://user:password@localhost:5432/social_project_db
+JWT_SECRET=your_secure_random_secret_key_change_this_in_production
+CORS_ORIGIN=http://localhost:3001
+```
+
+**Frontend (.env.local):**
+```bash
 cd packages/frontend
 cp .env.example .env.local
 ```
 
-### 3. Build Packages
-```bash
-npm run build
+Edit `packages/frontend/.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=Social Project
 ```
 
 ### 4. Run Database Migrations
@@ -51,7 +73,7 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-Open [http://localhost:3001](http://localhost:3001)
+Open [http://localhost:3001](http://localhost:3001) in your browser
 
 ## Testing Before Deployment
 
@@ -65,22 +87,7 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-**Optional: Test with Vercel CLI (for serverless-specific testing)**
 
-First time? See [VERCEL_SETUP_FIRST_TIME.md](VERCEL_SETUP_FIRST_TIME.md)
-
-```bash
-# Link to Vercel (first time only)
-cd packages/backend && vercel link
-
-# Start with Vercel dev
-vercel dev
-```
-
-**Read the guides:**
-- 📖 [VERCEL_SETUP_FIRST_TIME.md](VERCEL_SETUP_FIRST_TIME.md) - First time Vercel setup
-- 📖 [VERCEL_LOCAL_TESTING.md](VERCEL_LOCAL_TESTING.md) - Quick local testing guide
-- 📖 [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) - Complete deployment guide
 
 ## Deployment to Vercel
 
@@ -92,8 +99,6 @@ cd packages/backend && vercel
 cd packages/frontend && vercel
 ```
 
-See [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) for detailed instructions.
-
 ## Project Structure
 
 ```
@@ -103,9 +108,7 @@ social-project/
 │   ├── frontend/         # Next.js app
 │   └── shared/           # Shared types & schemas
 ├── e2e/                  # E2E tests
-├── test-local.sh         # Local testing setup script
-├── VERCEL_LOCAL_TESTING.md      # Local testing guide
-├── VERCEL_DEPLOYMENT_GUIDE.md   # Deployment guide
+├── test-local.sh         # Local testing setup guide
 └── package.json          # Workspace root
 ```
 
@@ -148,13 +151,6 @@ npm run lint                 # Lint code
 ✅ Responsive design
 ✅ Type-safe API with tRPC
 ✅ Optimized for Vercel serverless
-
-## Documentation
-
-- [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) - Complete deployment guide
-- [VERCEL_LOCAL_TESTING.md](VERCEL_LOCAL_TESTING.md) - Local testing with Vercel CLI
-- [packages/backend/.env.example](packages/backend/.env.example) - Backend environment variables
-- [packages/frontend/.env.example](packages/frontend/.env.example) - Frontend environment variables
 
 ## Troubleshooting
 
