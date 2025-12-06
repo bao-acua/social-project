@@ -35,14 +35,11 @@ export function EnhancedPostCard({
 
   const updatePostMutation = trpc.posts.updatePost.useMutation({
     onMutate: async (variables) => {
-      // Cancel outgoing refetches
       await utils.posts.getTimeline.cancel()
       await utils.posts.searchPosts.cancel()
 
-      // Snapshot previous values
-      const previousData: any[] = []
+      const previousData: Array<{ type: string; data: unknown }> = []
 
-      // Prepare the updated post data
       const updatedPostData = {
         id: variables.id,
         content: variables.content,
@@ -51,10 +48,8 @@ export function EnhancedPostCard({
         editedByAdmin: isAdmin && post.author?.id !== currentUserId,
       }
 
-      // Update local state immediately
       onPostUpdated?.(updatedPostData)
 
-      // Update all timeline queries with optimistic data
       utils.posts.getTimeline.setQueriesData({}, (old) => {
         if (!old) return old
         previousData.push({ type: 'timeline', data: old })
@@ -108,7 +103,7 @@ export function EnhancedPostCard({
       await utils.posts.searchPosts.cancel()
 
       // Snapshot previous values
-      const previousData: any[] = []
+      const previousData: Array<{ type: string; data: unknown }> = []
 
       // Update local state immediately
       onPostDeleted?.(variables.id, isAdmin || false)
