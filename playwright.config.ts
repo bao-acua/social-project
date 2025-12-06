@@ -31,22 +31,21 @@ export default defineConfig({
   ],
 
   // Start backend and frontend before running tests
+  // NOTE: Servers should be running before tests
+  // Run in separate terminals:
+  // Terminal 1: cd packages/backend && NODE_ENV=test DATABASE_URL="postgres://localhost:5432/social_project_test_db" npm run dev
+  // Terminal 2: cd packages/frontend && npm run dev
   webServer: [
     {
-      command: 'npm run dev:backend',
+      command: 'cd packages/backend && NODE_ENV=test DATABASE_URL="postgres://localhost:5432/social_project_test_db" npm run dev',
       url: 'http://localhost:3000/health',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true, // Use existing servers instead of starting new ones
       timeout: 120 * 1000,
-      env: {
-        NODE_ENV: 'test',
-        DATABASE_TEST_URL: process.env.DATABASE_TEST_URL || '',
-        JWT_SECRET: process.env.JWT_SECRET || '',
-      },
     },
     {
-      command: 'npm run dev:frontend',
+      command: 'cd packages/frontend && npm run dev',
       url: 'http://localhost:3001',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true, // Use existing servers instead of starting new ones
       timeout: 120 * 1000,
     },
   ],
