@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias && node scripts/fix-imports.js",
+    "build:tsc": "tsc",
     "start": "node dist/index.js",
     "test": "NODE_ENV=test vitest run",
     "test:watch": "NODE_ENV=test vitest",
@@ -19,6 +20,7 @@
     "db:seed": "tsx src/infrastructure/database/seed.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
     "@trpc/client": "^11.7.2",
     "@trpc/server": "^11.7.2",
     "bcrypt": "^6.0.0",
@@ -38,6 +40,7 @@
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
     "drizzle-kit": "^0.31.7",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.15"

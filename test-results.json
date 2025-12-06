@@ -1,0 +1,238 @@
+{
+  "config": {
+    "configFile": "/Users/baolequoc/learn/social-project/playwright.config.ts",
+    "rootDir": "/Users/baolequoc/learn/social-project/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/baolequoc/learn/social-project/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/baolequoc/learn/social-project/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth/sign-in.spec.ts",
+      "file": "auth/sign-in.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Sign In",
+          "file": "auth/sign-in.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should successfully sign in with valid credentials",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30730,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/baolequoc/learn/social-project/e2e/auth/sign-in.spec.ts",
+                            "column": 52,
+                            "line": 14
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('login-username-input')\u001b[22m\n\n\n\u001b[0m \u001b[90m 12 |\u001b[39m\n \u001b[90m 13 |\u001b[39m     \u001b[90m// Fill in credentials\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 14 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'login-username-input'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[33mTEST_USERS\u001b[39m\u001b[33m.\u001b[39muser1\u001b[33m.\u001b[39musername)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 15 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'login-password-input'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[33mTEST_USERS\u001b[39m\u001b[33m.\u001b[39muser1\u001b[33m.\u001b[39mpassword)\u001b[33m;\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m     \u001b[90m// Submit login form\u001b[39m\u001b[0m\n\u001b[2m    at /Users/baolequoc/learn/social-project/e2e/auth/sign-in.spec.ts:14:52\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-06T04:17:51.122Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/baolequoc/learn/social-project/test-results/auth-sign-in-Sign-In-shoul-c25fc-n-in-with-valid-credentials-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/baolequoc/learn/social-project/test-results/auth-sign-in-Sign-In-shoul-c25fc-n-in-with-valid-credentials-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/baolequoc/learn/social-project/test-results/auth-sign-in-Sign-In-shoul-c25fc-n-in-with-valid-credentials-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "69d4de2b2c4466803729-043f28fc9154b52adfcb",
+              "file": "auth/sign-in.spec.ts",
+              "line": 6,
+              "column": 7
+            },
+            {
+              "title": "should show error with invalid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "69d4de2b2c4466803729-4e35145dffab488ea7ae",
+              "file": "auth/sign-in.spec.ts",
+              "line": 27,
+              "column": 7
+            },
+            {
+              "title": "should show validation error when fields are empty",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "69d4de2b2c4466803729-20cd953603b46ad46466",
+              "file": "auth/sign-in.spec.ts",
+              "line": 45,
+              "column": 7
+            },
+            {
+              "title": "should navigate to sign up page from login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "69d4de2b2c4466803729-85c4b70f970a60de6406",
+              "file": "auth/sign-in.spec.ts",
+              "line": 55,
+              "column": 7
+            },
+            {
+              "title": "should persist authentication after page reload",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "69d4de2b2c4466803729-00555732e1bcd1c20d40",
+              "file": "auth/sign-in.spec.ts",
+              "line": 65,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-12-06T04:17:50.258Z",
+    "duration": 32302.403,
+    "expected": 0,
+    "skipped": 4,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

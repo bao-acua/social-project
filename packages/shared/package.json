@@ -6,11 +6,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "dev": "tsc --watch",
     "test": "echo 'Test script not configured'"
   },
   "devDependencies": {
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.3.3"
   }
 }

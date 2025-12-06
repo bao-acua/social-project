@@ -15,9 +15,9 @@
     "test": "npm run test --workspaces",
     "test:e2e": "NODE_ENV=test playwright test",
     "test:e2e:ui": "NODE_ENV=test playwright test --ui",
-    "test:e2e:headed": "NODE_ENV=test test --headed",
-    "test:e2e:debug": "NODE_ENV=test test --debug",
-    "test:e2e:report": "NODE_ENV=test show-report"
+    "test:e2e:headed": "NODE_ENV=test playwright test --headed",
+    "test:e2e:debug": "NODE_ENV=test playwright test --debug",
+    "test:e2e:report": "NODE_ENV=test playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

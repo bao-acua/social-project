@@ -2,7 +2,6 @@
 
 import { forwardRef } from 'react'
 import { EnhancedPostCard } from '@/components/enhanced-post-card'
-import { Button } from '@/components/ui/button'
 import { ErrorMessage } from '@/components/error-message'
 import type { PostResponse } from 'shared'
 import type { TRPCClientErrorLike } from '@trpc/client'
@@ -16,7 +15,7 @@ interface PostListProps {
   isSearchMode: boolean
   currentUserId?: string
   isAdmin?: boolean
-  onLoadMore: () => void
+  onLoadMore?: () => void
 }
 
 export const PostList = forwardRef<HTMLDivElement, PostListProps>(
@@ -29,7 +28,6 @@ export const PostList = forwardRef<HTMLDivElement, PostListProps>(
       isSearchMode,
       currentUserId,
       isAdmin,
-      onLoadMore,
     },
     loadMoreRef
   ) {

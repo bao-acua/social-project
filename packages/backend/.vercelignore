@@ -1,0 +1,10 @@
+node_modules
+src
+*.test.ts
+*.spec.ts
+test
+coverage
+.env*
+!.env.production
+tsconfig.json
+vitest.config.ts

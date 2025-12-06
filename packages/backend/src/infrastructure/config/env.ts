@@ -18,6 +18,7 @@ const envSchema = z.object({
     return process.env.NODE_ENV == 'production' ? './dist' : './public';
   }),
   JWT_SECRET: z.string().default('secret'),
+  POSTGRES_URL: z.string().default('postgres://localhost:5432/social_project_db'),
 });
 
 export const env = envSchema.parse(process.env);
@@ -26,7 +27,7 @@ export const getDatabaseUrl = () => {
   if (env.NODE_ENV === 'test' && env.DATABASE_TEST_URL) {
     return env.DATABASE_TEST_URL;
   }
-  return env.DATABASE_URL;
+  return env.NODE_ENV === 'production' ? env.POSTGRES_URL : env.DATABASE_URL;
 };
 
 export type Env = z.infer<typeof envSchema>;

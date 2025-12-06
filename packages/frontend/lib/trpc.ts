@@ -20,7 +20,9 @@ export function getEndingLink() {
 
   let url: string
   if (isBrowser) {
-    url = '/api/trpc'
+    // In browser, use the NEXT_PUBLIC_API_URL to point to the backend
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+    url = `${apiUrl}/trpc`
   } else {
     const baseUrl = getBaseUrl()
     url = `${baseUrl}/api/trpc`
