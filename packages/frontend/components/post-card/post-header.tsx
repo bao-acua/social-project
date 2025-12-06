@@ -31,10 +31,10 @@ export function PostHeader({
       <div className="flex-1">
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-semibold truncate">{author.fullName}</p>
-          {author.role === 'admin' && <Badge variant="default">Admin</Badge>}
-          {isDeleted && <Badge variant="destructive">Deleted</Badge>}
+          {author.role === 'admin' && <Badge variant="default" className="transition-all duration-200">Admin</Badge>}
+          {isDeleted && <Badge variant="destructive" className="transition-all duration-200 animate-in fade-in slide-in-from-top-1">Deleted</Badge>}
           {isEdited && !isDeleted && (
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="transition-all duration-200 animate-in fade-in slide-in-from-top-1">
               {editedByAdmin ? 'Edited by admin' : 'Edited'}
             </Badge>
           )}

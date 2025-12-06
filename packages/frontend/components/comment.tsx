@@ -175,13 +175,13 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-semibold">{comment.author.fullName}</span>
                 {comment.author.role === 'admin' && (
-                  <Badge variant="default" className="text-xs py-0">Admin</Badge>
+                  <Badge variant="default" className="text-xs py-0 transition-all duration-200">Admin</Badge>
                 )}
                 {comment.isDeleted && isAdmin && (
-                  <Badge variant="destructive" className="text-xs py-0">Deleted (Admin only)</Badge>
+                  <Badge variant="destructive" className="text-xs py-0 transition-all duration-200 animate-in fade-in slide-in-from-top-1">Deleted (Admin only)</Badge>
                 )}
                 {comment.isEdited && !comment.isDeleted && (
-                  <Badge variant="secondary" className="text-xs py-0">
+                  <Badge variant="secondary" className="text-xs py-0 transition-all duration-200 animate-in fade-in slide-in-from-top-1">
                     {comment.editedByAdmin ? 'Edited by admin' : 'Edited'}
                   </Badge>
                 )}
