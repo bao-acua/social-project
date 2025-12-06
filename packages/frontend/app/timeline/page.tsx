@@ -15,6 +15,7 @@ export default function TimelinePage() {
   const {
     posts,
     isLoading,
+    isFetchingMore,
     error,
     hasNextPage,
     isSearchMode,
@@ -29,7 +30,7 @@ export default function TimelinePage() {
 
   const { loadMoreRef } = useInfiniteScroll({
     hasNextPage,
-    isLoading,
+    isLoading: isFetchingMore,
     onLoadMore: fetchNextPage,
   })
 
@@ -57,6 +58,7 @@ export default function TimelinePage() {
               ref={loadMoreRef}
               posts={posts}
               isLoading={isLoading}
+              isFetchingMore={isFetchingMore}
               error={error}
               hasNextPage={hasNextPage}
               isSearchMode={isSearchMode}

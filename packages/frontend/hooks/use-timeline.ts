@@ -16,6 +16,7 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [isSearchMode, setIsSearchMode] = useState(false)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
 
   // Timeline query
   const {
@@ -62,11 +63,13 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
     if (data?.posts) {
       setAllPosts(prev => {
         if (offset === 0) {
+          setIsFetchingMore(false)
           return data.posts
         }
         const newPosts = data.posts.filter(
           post => !prev.some(p => p.id === post.id)
         )
+        setIsFetchingMore(false)
         return [...prev, ...newPosts]
       })
     }
@@ -75,9 +78,10 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
   const hasNextPage = data ? (offset + POSTS_PER_PAGE) < data.pagination.total : false
 
   const fetchNextPage = useCallback(() => {
-    if (!hasNextPage) return
+    if (!hasNextPage || isFetchingMore) return
+    setIsFetchingMore(true)
     setOffset(prev => prev + POSTS_PER_PAGE)
-  }, [hasNextPage])
+  }, [hasNextPage, isFetchingMore])
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -113,6 +117,7 @@ export function useTimeline({ userRole }: UseTimelineOptions) {
   return {
     posts: allPosts,
     isLoading,
+    isFetchingMore,
     error,
     hasNextPage,
     isSearchMode,

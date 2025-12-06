@@ -10,6 +10,7 @@ import type { AppRouter } from '@/lib/trpc'
 interface PostListProps {
   posts: PostResponse[]
   isLoading: boolean
+  isFetchingMore?: boolean
   error: TRPCClientErrorLike<AppRouter> | null
   hasNextPage: boolean
   isSearchMode: boolean
@@ -23,6 +24,7 @@ export const PostList = forwardRef<HTMLDivElement, PostListProps>(
     {
       posts,
       isLoading,
+      isFetchingMore = false,
       error,
       hasNextPage,
       isSearchMode,
@@ -76,8 +78,11 @@ export const PostList = forwardRef<HTMLDivElement, PostListProps>(
 
         {hasNextPage && (
           <div ref={loadMoreRef} className="mt-4 h-20 flex items-center justify-center">
-            {isLoading && (
-              <p className="text-muted-foreground">Loading more posts...</p>
+            {isFetchingMore && (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                <p className="text-muted-foreground">Loading more posts...</p>
+              </div>
             )}
           </div>
         )}
