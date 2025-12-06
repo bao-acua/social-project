@@ -113,25 +113,27 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
         </Avatar>
         <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold">{comment.author.fullName}</span>
-              {comment.author.role === 'admin' && (
-                <Badge variant="default" className="text-xs py-0">Admin</Badge>
-              )}
-              {comment.isDeleted && (
-                <Badge variant="destructive" className="text-xs py-0">Deleted</Badge>
-              )}
-              {comment.isEdited && !comment.isDeleted && (
-                <Badge variant="secondary" className="text-xs py-0">
-                  {comment.editedByAdmin ? 'Edited by admin' : 'Edited'}
-                </Badge>
-              )}
-              <span className="text-xs text-muted-foreground">
-                {timeAgo}
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-semibold">{comment.author.fullName}</span>
+                {comment.author.role === 'admin' && (
+                  <Badge variant="default" className="text-xs py-0">Admin</Badge>
+                )}
+                {comment.isDeleted && isAdmin && (
+                  <Badge variant="destructive" className="text-xs py-0">Deleted (Admin only)</Badge>
+                )}
+                {comment.isEdited && !comment.isDeleted && (
+                  <Badge variant="secondary" className="text-xs py-0">
+                    {comment.editedByAdmin ? 'Edited by admin' : 'Edited'}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                @{comment.author.username} · {timeAgo}
                 {comment.isEdited && comment.editedAt && !comment.isDeleted && (
                   <> · Updated {relativeDate(new Date(comment.editedAt))}</>
                 )}
-              </span>
+              </p>
             </div>
             {canEdit && !comment.isDeleted && (
               <DropdownMenu>

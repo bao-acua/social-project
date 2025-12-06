@@ -3,7 +3,7 @@ import { TRPCError } from '@trpc/server';
 import { softDeleteComment as softDeleteCommentRepository, getCommentById } from './repository/comment.repository';
 import { ResourceNotFoundError, PermissionError, PreconditionError } from '../../lib/errors';
 
-export async function deleteComment(db: DBClient, id: string, currentUserId: string): Promise<void> {
+export async function deleteComment(db: DBClient, id: string, currentUserId: string, userRole: 'user' | 'admin'): Promise<void> {
   try {
     const comment = await getCommentById(db, id);
 
@@ -23,7 +23,8 @@ export async function deleteComment(db: DBClient, id: string, currentUserId: str
       });
     }
 
-    if (comment.authorId !== currentUserId) {
+    // Allow comment author or admin to delete
+    if (comment.authorId !== currentUserId && userRole !== 'admin') {
       throw new TRPCError({
         code: 'FORBIDDEN',
         message: 'You can only delete your own comments',

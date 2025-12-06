@@ -6,7 +6,8 @@ import { CommentQuerySchemaInput, CommentsByPostResponse } from '@shared/trpc/ro
 export async function getCommentsByPost(
   db: DBClient,
   postId: string,
-  input: CommentQuerySchemaInput
+  input: CommentQuerySchemaInput,
+  userRole: 'user' | 'admin'
 ): Promise<CommentsByPostResponse> {
   try {
     const { limit, offset } = input;
@@ -15,8 +16,8 @@ export async function getCommentsByPost(
     const safeOffset = Math.max(offset, 0);
 
     const [commentsData, total] = await Promise.all([
-      getCommentsByPostIdRepository(db, postId, safeLimit, safeOffset),
-      countCommentsByPostId(db, postId),
+      getCommentsByPostIdRepository(db, postId, safeLimit, safeOffset, userRole === 'admin'),
+      countCommentsByPostId(db, postId, userRole === 'admin'),
     ]);
 
     const comments = commentsData.map((comment) => ({

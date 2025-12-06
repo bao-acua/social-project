@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createTestCaller, getTestDatabase, loginByUser } from '../../helpers/trpc';
+import { createTestCaller, getTestDatabase, loginByUser, loginByAdmin } from '../../helpers/trpc';
 import { createTestPost, createTestComment } from '../../helpers/database';
 
 describe('Comment Router Integration Tests', () => {
@@ -510,6 +510,204 @@ describe('Comment Router Integration Tests', () => {
           id: '00000000-0000-0000-0000-000000000000',
         })
       ).rejects.toThrow();
+    });
+  });
+
+  describe('Admin privileges', () => {
+    it('should allow admin to edit another user\'s comment', async () => {
+      const db = getTestDatabase();
+      const { caller: adminCaller, user: adminUser } = await loginByAdmin(db, {
+        username: 'admin',
+        fullName: 'Admin User',
+      });
+      const { user: regularUser } = await loginByUser(db, {
+        username: 'regularuser',
+        fullName: 'Regular User',
+      });
+
+      const post = await createTestPost(db, {
+        content: 'Test post',
+        authorId: regularUser.id,
+      });
+
+      const comment = await createTestComment(db, {
+        content: 'Original comment',
+        postId: post.id,
+        authorId: regularUser.id,
+      });
+
+      const result = await adminCaller.comments.updateComment({
+        id: comment.id,
+        content: 'Admin edited this comment',
+      });
+
+      expect(result.comment.content).toBe('Admin edited this comment');
+      expect(result.comment.isEdited).toBe(true);
+      expect(result.comment.editedByAdmin).toBe(true);
+      expect(result.comment.author.id).toBe(regularUser.id); // Original author unchanged
+    });
+
+    it('should allow admin to delete another user\'s comment', async () => {
+      const db = getTestDatabase();
+      const { caller: adminCaller } = await loginByAdmin(db, {
+        username: 'admin',
+        fullName: 'Admin User',
+      });
+      const { user: regularUser } = await loginByUser(db, {
+        username: 'regularuser',
+        fullName: 'Regular User',
+      });
+
+      const post = await createTestPost(db, {
+        content: 'Test post',
+        authorId: regularUser.id,
+      });
+
+      const comment = await createTestComment(db, {
+        content: 'Comment to be deleted by admin',
+        postId: post.id,
+        authorId: regularUser.id,
+      });
+
+      const result = await adminCaller.comments.deleteComment({
+        id: comment.id,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should show editedByAdmin as false when author edits their own comment', async () => {
+      const db = getTestDatabase();
+      const { caller, user } = await loginByUser(db);
+
+      const post = await createTestPost(db, {
+        content: 'Test post',
+        authorId: user.id,
+      });
+
+      const comment = await createTestComment(db, {
+        content: 'Original comment',
+        postId: post.id,
+        authorId: user.id,
+      });
+
+      const result = await caller.comments.updateComment({
+        id: comment.id,
+        content: 'Self edited comment',
+      });
+
+      expect(result.comment.content).toBe('Self edited comment');
+      expect(result.comment.isEdited).toBe(true);
+      expect(result.comment.editedByAdmin).toBe(false);
+    });
+
+    it('should allow admin to see deleted comments', async () => {
+      const db = getTestDatabase();
+      const { caller: adminCaller } = await loginByAdmin(db, {
+        username: 'admin',
+        fullName: 'Admin User',
+      });
+      const { caller: userCaller, user: regularUser } = await loginByUser(db, {
+        username: 'regularuser',
+        fullName: 'Regular User',
+      });
+
+      const post = await createTestPost(db, {
+        content: 'Test post',
+        authorId: regularUser.id,
+      });
+
+      const comment = await createTestComment(db, {
+        content: 'Comment to be deleted',
+        postId: post.id,
+        authorId: regularUser.id,
+      });
+
+      // Delete the comment
+      await adminCaller.comments.deleteComment({
+        id: comment.id,
+      });
+
+      // Admin should see the deleted comment
+      const adminResult = await adminCaller.comments.getCommentsByPost({
+        postId: post.id,
+        limit: 20,
+        offset: 0,
+      });
+
+      expect(adminResult.comments).toHaveLength(1);
+      expect(adminResult.comments[0].id).toBe(comment.id);
+      expect(adminResult.comments[0].isDeleted).toBe(true);
+
+      // Regular user should NOT see the deleted comment
+      const userResult = await userCaller.comments.getCommentsByPost({
+        postId: post.id,
+        limit: 20,
+        offset: 0,
+      });
+
+      expect(userResult.comments).toHaveLength(0);
+    });
+
+    it('should count deleted comments for admin but not for regular users', async () => {
+      const db = getTestDatabase();
+      const { caller: adminCaller } = await loginByAdmin(db, {
+        username: 'admin',
+        fullName: 'Admin User',
+      });
+      const { caller: userCaller, user: regularUser } = await loginByUser(db, {
+        username: 'regularuser',
+        fullName: 'Regular User',
+      });
+
+      const post = await createTestPost(db, {
+        content: 'Test post',
+        authorId: regularUser.id,
+      });
+
+      // Create 3 comments
+      const comment1 = await createTestComment(db, {
+        content: 'Comment 1',
+        postId: post.id,
+        authorId: regularUser.id,
+      });
+
+      const comment2 = await createTestComment(db, {
+        content: 'Comment 2',
+        postId: post.id,
+        authorId: regularUser.id,
+      });
+
+      const comment3 = await createTestComment(db, {
+        content: 'Comment 3',
+        postId: post.id,
+        authorId: regularUser.id,
+      });
+
+      // Delete one comment
+      await adminCaller.comments.deleteComment({
+        id: comment2.id,
+      });
+
+      // Admin should see total of 3 comments (including deleted)
+      const adminResult = await adminCaller.comments.getCommentsByPost({
+        postId: post.id,
+        limit: 20,
+        offset: 0,
+      });
+
+      expect(adminResult.pagination.total).toBe(3);
+      expect(adminResult.comments).toHaveLength(3);
+
+      // Regular user should see total of 2 comments (excluding deleted)
+      const userResult = await userCaller.comments.getCommentsByPost({
+        postId: post.id,
+        limit: 20,
+        offset: 0,
+      });
+
+      expect(userResult.pagination.total).toBe(2);
+      expect(userResult.comments).toHaveLength(2);
     });
   });
 });

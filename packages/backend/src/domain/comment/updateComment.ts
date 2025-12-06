@@ -8,7 +8,8 @@ export async function updateComment(
   db: DBClient,
   id: string,
   input: UpdateCommentInputSchema,
-  currentUserId: string
+  currentUserId: string,
+  userRole: 'user' | 'admin'
 ): Promise<UpdateCommentResponse> {
   try {
     const comment = await getCommentById(db, id);
@@ -29,7 +30,8 @@ export async function updateComment(
       });
     }
 
-    if (comment.authorId !== currentUserId) {
+    // Allow comment author or admin to edit
+    if (comment.authorId !== currentUserId && userRole !== 'admin') {
       throw new TRPCError({
         code: 'FORBIDDEN',
         message: 'You can only edit your own comments',

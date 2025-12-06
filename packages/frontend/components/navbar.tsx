@@ -22,7 +22,6 @@ import { usePathname } from 'next/navigation'
 
 function LoggedInNavbar({ username, logout }: { username: string; logout: () => void }) {
   const pathname = usePathname()
-  console.log("🚀 ~ LoggedInNavbar ~ pathname:", pathname)
   return (
     <>
       <NavigationMenu>

@@ -8,8 +8,19 @@ export async function getCommentsByPostId(
   db: DBClient,
   postId: string,
   limit: number,
-  offset: number
+  offset: number,
+  includeDeleted: boolean = false
 ): Promise<CommentWithAuthor[]> {
+  const whereConditions = [
+    eq(comments.postId, postId),
+    isNull(comments.parentCommentId)
+  ];
+
+  // Only filter out deleted comments if not an admin
+  if (!includeDeleted) {
+    whereConditions.push(eq(comments.isDeleted, false));
+  }
+
   const query = db
     .select({
       id: comments.id,
@@ -30,13 +41,7 @@ export async function getCommentsByPostId(
     })
     .from(comments)
     .innerJoin(users, eq(comments.authorId, users.id))
-    .where(
-      and(
-        eq(comments.postId, postId),
-        eq(comments.isDeleted, false),
-        isNull(comments.parentCommentId)
-      )
-    )
+    .where(and(...whereConditions))
     .orderBy(desc(comments.createdAt))
     .limit(limit)
     .offset(offset);
@@ -150,18 +155,20 @@ export async function softDeleteComment(db: DBClient, id: string, userId: string
   return comment;
 }
 
-export async function countCommentsByPostId(db: DBClient, postId: string): Promise<number> {
+export async function countCommentsByPostId(db: DBClient, postId: string, includeDeleted: boolean = false): Promise<number> {
+  const whereConditions = [eq(comments.postId, postId)];
+
+  // Only filter out deleted comments if not an admin
+  if (!includeDeleted) {
+    whereConditions.push(eq(comments.isDeleted, false));
+  }
+
   const result = await db
     .select({
       count: sql<number>`count(*)::int`,
     })
     .from(comments)
-    .where(
-      and(
-        eq(comments.postId, postId),
-        eq(comments.isDeleted, false)
-      )
-    );
+    .where(and(...whereConditions));
 
   return result[0]?.count ?? 0;
 }

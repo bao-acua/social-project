@@ -28,7 +28,7 @@ export const commentRouter = router({
     .output(commentsByPostResponseSchema)
     .query(async ({ input, ctx }) => {
       const { postId, ...queryData } = input;
-      return await getCommentsByPost(ctx.db, postId, queryData);
+      return await getCommentsByPost(ctx.db, postId, queryData, ctx.user!.role);
     }),
 
   updateComment: authenticatedProcedure
@@ -36,13 +36,13 @@ export const commentRouter = router({
     .output(updateCommentResponseSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input;
-      return await updateComment(ctx.db, id, updateData, ctx.user!.userId);
+      return await updateComment(ctx.db, id, updateData, ctx.user!.userId, ctx.user!.role);
     }),
 
   deleteComment: authenticatedProcedure
     .input(commentIdParamSchema)
     .mutation(async ({ input, ctx }) => {
-      await deleteComment(ctx.db, input.id, ctx.user!.userId);
+      await deleteComment(ctx.db, input.id, ctx.user!.userId, ctx.user!.role);
       return { success: true };
     }),
 });
