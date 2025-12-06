@@ -6,7 +6,15 @@ dotenv.config();
 
 const envSchema = z.object({
   NODE_ENV: z
-    .enum(['development', 'production', 'test'])
+    .string()
+    .transform((val) => {
+      // Trim whitespace and convert to lowercase for comparison
+      const normalized = val?.trim().toLowerCase();
+      if (normalized === 'production') return 'production';
+      if (normalized === 'test') return 'test';
+      return 'development';
+    })
+    .pipe(z.enum(['development', 'production', 'test']))
     .default('development'),
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('0.0.0.0'),

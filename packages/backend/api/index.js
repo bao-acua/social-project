@@ -22,8 +22,13 @@ async function build() {
     });
 
     // Register CORS plugin
+    const frontendUrls = process.env.FRONTEND_URL?.trim();
+    const allowedOrigins = frontendUrls
+      ? frontendUrls.split(',').map(url => url.trim())
+      : true;
+
     await app.register(cors, {
-      origin: process.env.FRONTEND_URL || true, // Allow all origins in serverless
+      origin: allowedOrigins, // Allow specified origins or all if not specified
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],

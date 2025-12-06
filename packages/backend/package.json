@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/types/router.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./types": "./dist/types/router.js"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc && tsc-alias && node scripts/fix-imports.js",
