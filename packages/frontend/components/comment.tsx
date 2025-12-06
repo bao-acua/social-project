@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import relativeDate from 'tiny-relative-date'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -46,9 +46,26 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
   const [editError, setEditError] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { user } = useAuth()
   const utils = trpc.useUtils()
+
+  useEffect(() => {
+    if (editDialogOpen) {
+      setEditContent(comment.content)
+      // Wait for next render cycle to ensure dialog is fully rendered
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (textareaRef.current) {
+            const length = comment.content.length
+            textareaRef.current.focus()
+            textareaRef.current.setSelectionRange(length, length)
+          }
+        })
+      })
+    }
+  }, [editDialogOpen, comment.content])
 
   const updateCommentMutation = trpc.comments.updateComment.useMutation({
     onMutate: async (variables) => {
@@ -238,6 +255,7 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
               <div className="grid gap-2">
                 <Label htmlFor="edit-comment-content">Content</Label>
                 <Textarea
+                  ref={textareaRef}
                   id="edit-comment-content"
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}

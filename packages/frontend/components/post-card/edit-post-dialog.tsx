@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,23 @@ export function EditPostDialog({
 }: EditPostDialogProps) {
   const [content, setContent] = useState(initialContent)
   const [error, setError] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (open) {
+      setContent(initialContent)
+      // Wait for next render cycle to ensure dialog is fully rendered
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (textareaRef.current) {
+            const length = initialContent.length
+            textareaRef.current.focus()
+            textareaRef.current.setSelectionRange(length, length)
+          }
+        })
+      })
+    }
+  }, [open, initialContent])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +87,7 @@ export function EditPostDialog({
             <div className="grid gap-2">
               <Label htmlFor="edit-content">Content</Label>
               <Textarea
+                ref={textareaRef}
                 id="edit-content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
