@@ -12,9 +12,10 @@ const COMMENTS_PER_PAGE = 10
 
 interface CommentSectionProps {
   postId: string
+  onCommentCountChange?: (delta: number) => void
 }
 
-export function CommentSection({ postId }: CommentSectionProps) {
+export function CommentSection({ postId, onCommentCountChange }: CommentSectionProps) {
   const [newComment, setNewComment] = useState('')
   const [offset, setOffset] = useState(0)
   const [allComments, setAllComments] = useState<CommentResponse[]>([])
@@ -43,8 +44,8 @@ export function CommentSection({ postId }: CommentSectionProps) {
       setError('')
       // Don't reset - just add the new comment to the top
       setAllComments(prev => [result.comment, ...prev])
-      // Only invalidate to update counts, not refetch all comments
-      utils.posts.getTimeline.invalidate()
+      // Update comment count
+      onCommentCountChange?.(1)
     },
     onError: (err) => {
       setError(err.message || 'Failed to create comment')
@@ -154,6 +155,10 @@ export function CommentSection({ postId }: CommentSectionProps) {
               <Comment
                 comment={comment}
                 postId={postId}
+                onCommentDeleted={() => {
+                  // Decrease count when comment is deleted
+                  onCommentCountChange?.(-1)
+                }}
                 onCommentUpdated={() => {
                   setOffset(0)
                   setAllComments([])

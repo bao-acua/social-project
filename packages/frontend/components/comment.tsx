@@ -39,9 +39,10 @@ interface CommentProps {
   comment: CommentResponse
   postId: string
   onCommentUpdated?: () => void
+  onCommentDeleted?: () => void
 }
 
-export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
+export function Comment({ comment, postId, onCommentUpdated, onCommentDeleted }: CommentProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
@@ -140,6 +141,7 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
     },
     onSuccess: () => {
       setDeleteDialogOpen(false)
+      onCommentDeleted?.()
       onCommentUpdated?.()
     },
     onSettled: () => {

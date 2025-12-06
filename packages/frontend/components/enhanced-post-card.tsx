@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -30,8 +30,14 @@ export function EnhancedPostCard({
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [showComments, setShowComments] = useState(false)
+  const [localCommentsCount, setLocalCommentsCount] = useState(post.commentsCount)
 
   const utils = trpc.useUtils()
+
+  // Sync local count when post changes
+  useEffect(() => {
+    setLocalCommentsCount(post.commentsCount)
+  }, [post.commentsCount])
 
   const updatePostMutation = trpc.posts.updatePost.useMutation({
     onMutate: async (variables) => {
@@ -125,11 +131,23 @@ export function EnhancedPostCard({
                   size="sm"
                   onClick={() => setShowComments(!showComments)}
                 >
-                  {post.commentsCount}{' '}
-                  {post.commentsCount === 1 ? 'comment' : 'comments'}
+                  {localCommentsCount}{' '}
+                  {localCommentsCount === 1 ? 'comment' : 'comments'}
                 </Button>
               </div>
-              {showComments && <CommentSection postId={post.id} />}
+              {showComments && (
+                <CommentSection
+                  postId={post.id}
+                  onCommentCountChange={(delta) => {
+                    setLocalCommentsCount(prev => prev + delta)
+                    // Also update the post in local state if callback provided
+                    onPostUpdated?.({
+                      id: post.id,
+                      commentsCount: localCommentsCount + delta
+                    })
+                  }}
+                />
+              )}
             </>
           )}
         </CardContent>
