@@ -12,9 +12,17 @@
     "build:frontend": "npm run build --workspace=frontend",
     "build:shared": "npm run build --workspace=shared",
     "build": "npm run build:shared && npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "test:e2e": "NODE_ENV=test playwright test",
+    "test:e2e:ui": "NODE_ENV=test playwright test --ui",
+    "test:e2e:headed": "NODE_ENV=test test --headed",
+    "test:e2e:debug": "NODE_ENV=test test --debug",
+    "test:e2e:report": "NODE_ENV=test show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^24.10.1",
+    "dotenv": "^17.2.3",
     "typescript": "^5.3.3"
   }
 }

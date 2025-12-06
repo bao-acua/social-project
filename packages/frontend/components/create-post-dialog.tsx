@@ -59,9 +59,9 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Post</Button>
+        <Button data-ci="create-post-trigger">Create Post</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px]" data-ci="create-post-dialog">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create a new post</DialogTitle>
@@ -79,12 +79,13 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
                 onChange={(e) => setContent(e.target.value)}
                 rows={6}
                 disabled={createPostMutation.isPending}
+                data-ci="create-post-content-input"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{content.length} / 5000 characters</span>
               </div>
               {error && (
-                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-sm font-medium text-destructive" data-ci="create-post-error">{error}</p>
               )}
             </div>
           </div>
@@ -94,10 +95,11 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={createPostMutation.isPending}
+              data-ci="create-post-cancel-button"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createPostMutation.isPending}>
+            <Button type="submit" disabled={createPostMutation.isPending} data-ci="create-post-submit-button">
               {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
             </Button>
           </DialogFooter>

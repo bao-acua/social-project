@@ -24,16 +24,16 @@ export function PostActionsMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" data-ci="post-actions-menu-trigger">
           ⋮
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {canEdit && (
-          <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={onEdit} data-ci="post-edit-button">Edit</DropdownMenuItem>
         )}
         {canDelete && (
-          <DropdownMenuItem onClick={onDelete} className="text-destructive">
+          <DropdownMenuItem onClick={onDelete} className="text-destructive" data-ci="post-delete-button">
             Delete
           </DropdownMenuItem>
         )}

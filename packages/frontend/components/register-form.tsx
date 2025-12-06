@@ -132,7 +132,7 @@ export function RegisterForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" data-ci="register-form">
           <FormField
             id="username"
             label="Username"
@@ -141,6 +141,7 @@ export function RegisterForm() {
             value={username}
             onChange={handleUsernameChange}
             error={usernameError}
+            data-ci="register-username-input"
           />
           <FormField
             id="fullName"
@@ -149,6 +150,7 @@ export function RegisterForm() {
             placeholder="Enter your full name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            data-ci="register-fullname-input"
           />
           <div className="space-y-3">
             <FormField
@@ -159,6 +161,7 @@ export function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               showPasswordToggle={true}
+              data-ci="register-password-input"
             />
             {password && <PasswordStrengthIndicator password={password} />}
           </div>
@@ -171,16 +174,17 @@ export function RegisterForm() {
             onChange={handleRePasswordChange}
             error={rePasswordError}
             showPasswordToggle={true}
+            data-ci="register-confirm-password-input"
           />
           <SelectRole role={role} setRole={setRole} />
 
-          {error && <ErrorMessage error={error} />}
-          <Button type="submit" className="w-full" disabled={!isFormValid}>
+          {error && <ErrorMessage error={error} data-ci="register-error-message" />}
+          <Button type="submit" className="w-full" disabled={!isFormValid} data-ci="register-submit-button">
             Sign Up
           </Button>
           <p className="text-sm text-center text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline" data-ci="register-login-link">
               Sign in
             </Link>
           </p>

@@ -214,7 +214,7 @@ describe('Post Router Integration Tests', () => {
         includeDeleted: 'true',
       });
 
-      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      const deletedPosts = result.posts.filter((post: { isDeleted: boolean }) => post.isDeleted);
       expect(deletedPosts.length).toBe(0);
     });
 
@@ -243,7 +243,7 @@ describe('Post Router Integration Tests', () => {
         includeDeleted: 'true',
       });
 
-      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      const deletedPosts = result.posts.filter((post: { isDeleted: boolean }) => post.isDeleted);
       expect(deletedPosts.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -291,7 +291,7 @@ describe('Post Router Integration Tests', () => {
       });
 
       expect(result.posts.length).toBeGreaterThanOrEqual(1);
-      expect(result.posts[0].content).toContain('javascript');
+      expect(result.posts[0]?.content).toContain('javascript');
     });
 
     it('should successfully search posts by author name', async () => {
@@ -313,7 +313,7 @@ describe('Post Router Integration Tests', () => {
       });
 
       expect(result.posts.length).toBeGreaterThanOrEqual(1);
-      expect(result.posts.some(post => post.author?.fullName.includes('John'))).toBe(true);
+      expect(result.posts.some((post: { author: { fullName: string } | null }) => post.author?.fullName.includes('John'))).toBe(true);
     });
 
     it('should successfully search posts by username', async () => {
@@ -335,7 +335,7 @@ describe('Post Router Integration Tests', () => {
       });
 
       expect(result.posts.length).toBeGreaterThanOrEqual(1);
-      expect(result.posts[0].author?.username).toBe('uniqueusername123');
+      expect(result.posts[0]?.author?.username).toBe('uniqueusername123');
     });
 
     it('should return empty results for non-matching query', async () => {
@@ -401,7 +401,7 @@ describe('Post Router Integration Tests', () => {
         offset: '2',
       });
 
-      expect(firstPage.posts[0].id).not.toBe(secondPage.posts[0]?.id);
+      expect(firstPage.posts[0]?.id).not.toBe(secondPage.posts[0]?.id);
     });
 
     it('should not return deleted posts for regular users', async () => {
@@ -429,7 +429,7 @@ describe('Post Router Integration Tests', () => {
         includeDeleted: 'true',
       });
 
-      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      const deletedPosts = result.posts.filter((post: { isDeleted: boolean }) => post.isDeleted);
       expect(deletedPosts.length).toBe(0);
     });
 
@@ -461,7 +461,7 @@ describe('Post Router Integration Tests', () => {
         includeDeleted: 'true',
       });
 
-      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      const deletedPosts = result.posts.filter((post: { isDeleted: boolean }) => post.isDeleted);
       expect(deletedPosts.length).toBeGreaterThanOrEqual(1);
       expect(result.posts.length).toBeGreaterThanOrEqual(2);
     });
@@ -491,7 +491,7 @@ describe('Post Router Integration Tests', () => {
         includeDeleted: 'false',
       });
 
-      const deletedPosts = result.posts.filter(post => post.isDeleted);
+      const deletedPosts = result.posts.filter((post: { isDeleted: boolean }) => post.isDeleted);
       expect(deletedPosts.length).toBe(0);
     });
 
@@ -521,7 +521,7 @@ describe('Post Router Integration Tests', () => {
       });
 
       expect(result.posts.length).toBeGreaterThanOrEqual(1);
-      const post = result.posts.find(p => p.content.includes('javascript'));
+      const post = result.posts.find((p: { content: string }) => p.content.includes('javascript'));
       expect(post).toBeDefined();
     });
 

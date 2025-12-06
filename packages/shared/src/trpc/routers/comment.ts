@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { userResponseSchema } from "./auth";
+import { postIdParamSchema, PostIdParamSchema, paginationResponseSchema } from "./post";
 
 export const createCommentSchema = z.object({
   content: z
@@ -51,11 +52,9 @@ export const commentIdParamSchema = z.object({
 
 export type CommentIdParamSchema = z.infer<typeof commentIdParamSchema>;
 
-export const postIdParamSchema = z.object({
-  postId: z.string().uuid('Invalid post ID format'),
-});
-
-export type PostIdParamSchema = z.infer<typeof postIdParamSchema>;
+// Re-export from post.ts to avoid duplication
+export { postIdParamSchema };
+export type { PostIdParamSchema };
 
 export const commentQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(20),
@@ -88,12 +87,8 @@ export const commentResponseSchema = z.object({
 
 export type CommentResponse = z.infer<typeof commentResponseSchema>;
 
-export const paginationResponseSchema = z.object({
-  limit: z.number(),
-  offset: z.number(),
-  total: z.number(),
-});
-
+// Re-export from post.ts to avoid duplication
+export { paginationResponseSchema };
 export type PaginationResponse = z.infer<typeof paginationResponseSchema>;
 
 export const commentsByPostResponseSchema = z.object({

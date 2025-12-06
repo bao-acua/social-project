@@ -77,7 +77,7 @@ export function EditPostDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px]" data-ci="edit-post-dialog">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit Post</DialogTitle>
@@ -93,6 +93,7 @@ export function EditPostDialog({
                 onChange={(e) => setContent(e.target.value)}
                 rows={6}
                 disabled={isLoading}
+                data-ci="edit-post-content-input"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>
@@ -100,7 +101,7 @@ export function EditPostDialog({
                 </span>
               </div>
               {error && (
-                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-sm font-medium text-destructive" data-ci="edit-post-error">{error}</p>
               )}
             </div>
           </div>
@@ -110,10 +111,11 @@ export function EditPostDialog({
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={isLoading}
+              data-ci="edit-post-cancel-button"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} data-ci="edit-post-save-button">
               {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>

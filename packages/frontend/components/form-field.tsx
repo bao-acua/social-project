@@ -16,6 +16,7 @@ interface FormFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   error?: string
   showPasswordToggle?: boolean
+  'data-ci'?: string
 }
 
 export function FormField({
@@ -27,6 +28,7 @@ export function FormField({
   onChange,
   error,
   showPasswordToggle = false,
+  'data-ci': dataCi,
 }: FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false)
   const isPassword = type === 'password'
@@ -46,6 +48,7 @@ export function FormField({
             isPassword && showPasswordToggle && 'pr-10',
             error && 'border-red-500 focus-visible:ring-red-500'
           )}
+          data-ci={dataCi}
         />
         {isPassword && showPasswordToggle && (
           <Button

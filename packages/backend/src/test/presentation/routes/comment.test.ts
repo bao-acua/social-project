@@ -516,7 +516,7 @@ describe('Comment Router Integration Tests', () => {
   describe('Admin privileges', () => {
     it('should allow admin to edit another user\'s comment', async () => {
       const db = getTestDatabase();
-      const { caller: adminCaller, user: adminUser } = await loginByAdmin(db, {
+      const { caller: adminCaller } = await loginByAdmin(db, {
         username: 'admin',
         fullName: 'Admin User',
       });
@@ -636,8 +636,8 @@ describe('Comment Router Integration Tests', () => {
       });
 
       expect(adminResult.comments).toHaveLength(1);
-      expect(adminResult.comments[0].id).toBe(comment.id);
-      expect(adminResult.comments[0].isDeleted).toBe(true);
+      expect(adminResult.comments[0]?.id).toBe(comment.id);
+      expect(adminResult.comments[0]?.isDeleted).toBe(true);
 
       // Regular user should NOT see the deleted comment
       const userResult = await userCaller.comments.getCommentsByPost({
@@ -666,7 +666,7 @@ describe('Comment Router Integration Tests', () => {
       });
 
       // Create 3 comments
-      const comment1 = await createTestComment(db, {
+      await createTestComment(db, {
         content: 'Comment 1',
         postId: post.id,
         authorId: regularUser.id,
@@ -678,7 +678,7 @@ describe('Comment Router Integration Tests', () => {
         authorId: regularUser.id,
       });
 
-      const comment3 = await createTestComment(db, {
+      await createTestComment(db, {
         content: 'Comment 3',
         postId: post.id,
         authorId: regularUser.id,

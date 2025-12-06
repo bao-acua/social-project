@@ -44,7 +44,7 @@ function LoggedInNavbar({ user, logout }: { user: User; logout: () => void }) {
       </NavigationMenu>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex items-center space-x-2 bottom-0 outline-none focus:outline-none">
+          <Button variant="ghost" className="flex items-center space-x-2 bottom-0 outline-none focus:outline-none" data-ci="navbar-user-menu-trigger">
             <Avatar className="h-10 w-10">
               <AvatarImage src="" alt={user.fullName} />
               <AvatarFallback className="text-xs">
@@ -66,10 +66,10 @@ function LoggedInNavbar({ user, logout }: { user: User; logout: () => void }) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setProfileModalOpen(true)}>
+          <DropdownMenuItem onClick={() => setProfileModalOpen(true)} data-ci="navbar-update-profile-button">
             Update Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => logout()}>
+          <DropdownMenuItem onClick={() => logout()} data-ci="navbar-logout-button">
             Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>

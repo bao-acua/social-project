@@ -24,7 +24,7 @@ export function DeletePostDialog({
 }: DeletePostDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent data-ci="delete-post-dialog">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -32,11 +32,12 @@ export function DeletePostDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading} data-ci="delete-post-cancel-button">Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            data-ci="delete-post-confirm-button"
           >
             {isLoading ? 'Deleting...' : 'Delete'}
           </AlertDialogAction>

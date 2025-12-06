@@ -71,7 +71,7 @@ export function ProfileModal({ open, onOpenChange }: ProfileModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" data-ci="profile-modal">
         <DialogHeader>
           <DialogTitle>Update Profile</DialogTitle>
           <DialogDescription>
@@ -100,6 +100,7 @@ export function ProfileModal({ open, onOpenChange }: ProfileModalProps) {
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
                 maxLength={100}
+                data-ci="profile-fullname-input"
               />
             </div>
             <div className="grid gap-2">
@@ -115,7 +116,7 @@ export function ProfileModal({ open, onOpenChange }: ProfileModalProps) {
               </p>
             </div>
             {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-sm text-red-500" data-ci="profile-error-message">{error}</p>
             )}
           </div>
           <DialogFooter>
@@ -124,10 +125,11 @@ export function ProfileModal({ open, onOpenChange }: ProfileModalProps) {
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={updateProfileMutation.isPending}
+              data-ci="profile-cancel-button"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={updateProfileMutation.isPending}>
+            <Button type="submit" disabled={updateProfileMutation.isPending} data-ci="profile-save-button">
               {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>

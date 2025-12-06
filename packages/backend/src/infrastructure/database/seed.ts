@@ -206,12 +206,14 @@ async function seed() {
       createdAt.setHours(createdAt.getHours() - hoursAgo);
       createdAt.setMinutes(createdAt.getMinutes() - minutesAgo);
 
-      postsToInsert.push({
-        content,
-        authorId: randomUser.id,
-        createdAt,
-        updatedAt: createdAt,
-      });
+      if (randomUser && content) {
+        postsToInsert.push({
+          content,
+          authorId: randomUser.id,
+          createdAt,
+          updatedAt: createdAt,
+        });
+      }
     }
 
     // Insert posts in batches of 50 for better performance
@@ -242,13 +244,15 @@ async function seed() {
         const minutesAfterPost = Math.floor(Math.random() * 60 * 24 * 14); // Within 2 weeks of post
         const commentCreatedAt = new Date(postCreatedAt.getTime() + minutesAfterPost * 60000);
 
-        commentsToInsert.push({
-          content: commentContent,
-          postId: post.id,
-          authorId: randomUser.id,
-          createdAt: commentCreatedAt,
-          updatedAt: commentCreatedAt,
-        });
+        if (randomUser && commentContent) {
+          commentsToInsert.push({
+            content: commentContent,
+            postId: post.id,
+            authorId: randomUser.id,
+            createdAt: commentCreatedAt,
+            updatedAt: commentCreatedAt,
+          });
+        }
       }
 
       // Insert regular comments in batch
@@ -262,18 +266,20 @@ async function seed() {
         const randomUser = createdUsers[Math.floor(Math.random() * createdUsers.length)];
         const replyContent = replyTemplates[Math.floor(Math.random() * replyTemplates.length)];
 
-        const parentCreatedAt = new Date(parentComment.createdAt);
-        const minutesAfterParent = Math.floor(Math.random() * 60 * 24 * 5); // Within 5 days of parent
-        const replyCreatedAt = new Date(parentCreatedAt.getTime() + minutesAfterParent * 60000);
+        if (parentComment && randomUser && replyContent) {
+          const parentCreatedAt = new Date(parentComment.createdAt);
+          const minutesAfterParent = Math.floor(Math.random() * 60 * 24 * 5); // Within 5 days of parent
+          const replyCreatedAt = new Date(parentCreatedAt.getTime() + minutesAfterParent * 60000);
 
-        replyCommentsToInsert.push({
-          content: replyContent,
-          postId: post.id,
-          authorId: randomUser.id,
-          parentCommentId: parentComment.id,
-          createdAt: replyCreatedAt,
-          updatedAt: replyCreatedAt,
-        });
+          replyCommentsToInsert.push({
+            content: replyContent,
+            postId: post.id,
+            authorId: randomUser.id,
+            parentCommentId: parentComment.id,
+            createdAt: replyCreatedAt,
+            updatedAt: replyCreatedAt,
+          });
+        }
       }
 
       // Insert reply comments in batch
@@ -292,7 +298,8 @@ async function seed() {
     console.log('✏️  Adding some edited posts...');
     const postsToEdit = createdPosts.slice(0, 10);
     for (const post of postsToEdit) {
-      const editor = createdUsers.find(u => u.id === post.authorId);
+      const editor = createdUsers.find((u): u is NonNullable<typeof u> => u?.id === post.authorId);
+      if (!editor) continue;
       const editedAt = new Date(post.createdAt);
       editedAt.setHours(editedAt.getHours() + Math.floor(Math.random() * 24) + 1); // Edit 1-24 hours after creation
 
@@ -300,7 +307,7 @@ async function seed() {
         .set({
           isEdited: true,
           editedAt,
-          editedBy: editor?.id,
+          editedBy: editor.id,
           content: post.content + '\n\nEdit: Fixed a typo!',
         })
         .where(sql`${posts.id} = ${post.id}`);

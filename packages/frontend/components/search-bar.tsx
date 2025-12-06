@@ -22,7 +22,7 @@ export function SearchBar({
   onClearSearch,
 }: SearchBarProps) {
   return (
-    <form onSubmit={onSearch} className="mb-6">
+    <form onSubmit={onSearch} className="mb-6" data-ci="search-form">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
@@ -31,19 +31,21 @@ export function SearchBar({
           value={searchInput}
           onChange={(e) => onSearchInputChange(e.target.value)}
           className="pl-10 pr-10"
+          data-ci="search-input"
         />
         {searchInput && (
           <button
             type="button"
             onClick={onClearSearch}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            data-ci="search-clear-button"
           >
             <X className="h-4 w-4" />
           </button>
         )}
       </div>
       {isSearchMode && (
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex items-center justify-between" data-ci="search-results-header">
           <p className="text-sm text-muted-foreground">
             Searching for: <span className="font-medium text-foreground">{searchQuery}</span>
           </p>
@@ -52,6 +54,7 @@ export function SearchBar({
             variant="ghost"
             size="sm"
             onClick={onClearSearch}
+            data-ci="search-clear-results-button"
           >
             Clear Search
           </Button>

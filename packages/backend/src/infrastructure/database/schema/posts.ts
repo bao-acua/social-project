@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum, index, customType, text, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, index, text, boolean } from 'drizzle-orm/pg-core';
 import { sql, type SQL } from 'drizzle-orm';
 import { users } from './users';
 import { tsvector } from './utils/tsvector';

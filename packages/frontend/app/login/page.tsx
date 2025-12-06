@@ -53,7 +53,7 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" data-ci="login-form">
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <Input
@@ -62,6 +62,7 @@ export default function LoginPage() {
                     placeholder="Enter your username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    data-ci="login-username-input"
                   />
                 </div>
                 <div className="space-y-2">
@@ -72,15 +73,16 @@ export default function LoginPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    data-ci="login-password-input"
                   />
                 </div>
                 {error && <ErrorMessage error={error} />}
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" data-ci="login-submit-button">
                   Sign In
                 </Button>
                 <p className="text-sm text-center text-muted-foreground">
                   Don&apos;t have an account?{' '}
-                  <Link href="/register" className="text-primary hover:underline">
+                  <Link href="/register" className="text-primary hover:underline" data-ci="login-signup-link">
                     Sign up
                   </Link>
                 </p>

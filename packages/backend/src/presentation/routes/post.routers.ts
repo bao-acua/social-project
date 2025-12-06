@@ -1,6 +1,6 @@
 import { router } from "../../infrastructure/trpc/trpc";
 import { authenticatedProcedure } from "../../infrastructure/trpc/procedure";
-import { createPostResponseSchema, createPostSchema, postIdParamSchema, searchPostsResponseSchema, searchPostsSchema, timelineQuerySchema, timelineResponseSchema, updatePostInputSchema, updatePostResponseSchema, updatePostSchema } from "@shared/trpc/routers/post";
+import { createPostResponseSchema, createPostSchema, postIdParamSchema, searchPostsResponseSchema, searchPostsSchema, timelineQuerySchema, timelineResponseSchema, updatePostInputSchema, updatePostResponseSchema } from "@shared/trpc/routers/post";
 import { getTimeline } from "../../domain/post/getTimeline";
 import { createPost } from "../../domain/post/createPost";
 import { updatePost } from "../../domain/post/updatePost";
