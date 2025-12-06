@@ -30,7 +30,7 @@ export function PostHeader({
       </Avatar>
       <div className="flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="font-semibold">{author.fullName}</p>
+          <p className="font-semibold truncate">{author.fullName}</p>
           {author.role === 'admin' && <Badge variant="default">Admin</Badge>}
           {isDeleted && <Badge variant="destructive">Deleted</Badge>}
           {isEdited && !isDeleted && (
