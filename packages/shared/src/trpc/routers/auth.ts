@@ -59,3 +59,13 @@ export const userResponseSchema = z.object({
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;
+
+
+export const updateProfileSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, 'Full name is required')
+    .max(100, 'Full name must be at most 100 characters'),
+});
+
+export type UpdateProfileSchemaInput = z.infer<typeof updateProfileSchema>;

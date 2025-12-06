@@ -96,7 +96,7 @@ export function Comment({ comment, postId, onCommentUpdated }: CommentProps) {
     deleteCommentMutation.mutate({ id: comment.id })
   }
 
-  const isOwnComment = user?.userId === comment.author.id
+  const isOwnComment = user?.id === comment.author.id
   const isAdmin = user?.role === 'admin'
   const canEdit = isOwnComment || isAdmin
   const canDelete = isOwnComment || isAdmin

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   NavigationMenu,
@@ -19,8 +20,10 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth, type User } from '@/context/auth-context'
 import { usePathname } from 'next/navigation'
+import { ProfileModal } from '@/components/profile-modal'
 
 function LoggedInNavbar({ username, logout }: { username: string; logout: () => void }) {
+  const [profileModalOpen, setProfileModalOpen] = useState(false)
   const pathname = usePathname()
   return (
     <>
@@ -53,11 +56,15 @@ function LoggedInNavbar({ username, logout }: { username: string; logout: () => 
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setProfileModalOpen(true)}>
+            Update Profile
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => logout()}>
             Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ProfileModal open={profileModalOpen} onOpenChange={setProfileModalOpen} />
     </>
   )
 }
