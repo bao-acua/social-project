@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 
 interface HeroSectionProps {
   isAuthenticated: boolean
@@ -35,9 +34,6 @@ export function HeroSection({ isAuthenticated }: HeroSectionProps) {
                 </Button>
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground mt-4">
-              No credit card required • Free forever
-            </p>
           </div>
         )}
 
